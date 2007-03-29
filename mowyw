@@ -188,28 +188,36 @@ sub parse_tokens {
 		if ($tokens->[0]->[0] eq "TAG_START"){
 			p_expect($tokens, "TAG_START", $meta);
 			my $key = p_expect($tokens, 'KEYWORD', $meta);
-			# TODO: implement this as a hash
-			if ($key eq "include") {
-				$str .= p_include($tokens, $meta);
-			} elsif ($key eq "menu"){
-				$str .= p_menu($tokens, $meta);
-			} elsif ($key eq "item") {
-				$str .= p_item($tokens, $meta);
-			} elsif ($key eq "option"){
-				p_option($tokens, $meta);
-			} elsif ($key eq "verbatim"){
-				$str .= p_verbatim($tokens, $meta);
-			} elsif ($key eq "endverbatim"){
-				parse_error("Unexpected tag 'endverbatim' without prior 'verbatim'", @{$meta->{FILES}});
-			} elsif ($key eq "comment"){
-				$str .= p_comment($tokens, $meta);
-			} elsif ($key eq "setvar"){
-				$str .= p_setvar($tokens, $meta);
-			} elsif ($key eq "readvar"){
-				$str .= p_readvar($tokens, $meta);
-			} elsif ($key eq "syntax"){
-				$str .= p_syntax($tokens, $meta);
+			my %dispatch = (
+				include 	=> \&p_include,
+				menu		=> \&p_menu,
+				item		=> \&p_item,
+				option		=> \&p_option,
+				verbatim 	=> \&p_verbatim,
+				endverbatim	=> sub {
+			#  p_verbatim reads until it finds endverbatim, so it
+			#  may never occur here
+			my ($tokens, $meta) = @_;
+			parse_error("Unexpected tag 'endverbatim' without prior 'verbatim'", @{$meta->{FILES}});
+				},
+				comment		=> \&p_comment,
+				setvar		=> \&p_setvar,
+				readvar		=> \&p_readvar,
+				syntax		=> \&p_syntax,
+				endvsyntax	=> sub {
+			#  p_syntax reads until it finds endsyntax, so it
+			#  may never occur here
+			my ($tokens, $meta) = @_;
+			parse_error("Unexpected tag 'endsyntax' without prior syntax'", @{$meta->{FILES}});
+				},
+				);
+			my $func = $dispatch{$key};
+			if ($func){
+				$str .= &$func($tokens, $meta);
+			} else {
+				confess("Action for keyword $key not yet implemented");
 			}
+
 		} elsif ($tokens->[0]->[0] eq "BRACES_START") {
 #			print "Working on braces\n";
 			$str .= p_braces($tokens, $meta);
@@ -492,3 +500,4 @@ sub parse_error {
 	}
 	exit 1;
 }
+
