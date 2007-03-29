@@ -1,0 +1,5 @@
+mowyw (0.2.0) 
+	* Mowyw/Lexer.pm: added a separate lexer
+	* mowyw: (nearly) complete rewrite using a recursive-descending parser
+	* README: added description for [[[verbatim foo]]] (arbitrary
+	stuff)[[[endverbatim foo]]]

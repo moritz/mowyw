@@ -1,0 +1,412 @@
+#!/usr/bin/perl
+# mowyw - mowyw writes your websites - Copyright (C) 2006 Moritz Lenz
+# For documentation please see the README file
+# 	<moritz@faui2k3.org>
+# 	Snail Mail address:
+# 		Moritz Lenz
+# 		Killingerstr. 92
+# 		91056 Erlangen
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+use warnings;
+use strict;
+use FindBin;
+use lib "$FindBin::Bin";
+use File::Copy;
+use File::Temp qw(tempfile);
+use File::Compare;
+use Mowyw::Lexer qw(lex);
+use Carp;
+use Storable qw(dclone);
+
+use Data::Dumper;
+
+sub process_file($);
+sub process_dir($);
+sub process_menu_tree;
+sub read_and_lex_file($);
+
+my $includes_prefix = "includes/";
+my $source_prefix = "source/";
+my $dest_prefix = "online/";
+my $menu_prefix = $includes_prefix . "menu-";
+my $postfix = "";
+
+my @todo = qw(source);
+my $header_content = undef;
+my $footer_content = undef;
+
+my $internal_error_message = "Please contact the Author at moritz\@faui2k3.org providing\nan example hwo to reproduce the error, including the complete error message";
+
+my @input_tokens = (
+		[ 'TAG_START', 		qr/\[\[\[\s*/],
+		[ 'KEYWORD', 		qr/(?:include|menu|option|item|endverbatim|verbatim)/],
+		[ 'TAG_END',		qr/\s*\]\]\]/],
+		[ 'BRACES_START', 	qr/{{/],
+		[ 'BRACES_END',	 	qr/}}/],
+	);
+
+main();
+#my %metadata = (ITEMS => [], 
+#		FILES => [], 
+#		CURRENT_ITEM => undef,
+#		OPTIONS => {},
+#	       );
+#my $str = parse_file("includes/head2", \%metadata);
+#print $str;
+
+
+sub main {
+	while (my $fn = pop @todo){
+		$fn .= '/' unless ($fn =~ m#/$#);
+		opendir DIR, $fn;
+		IW: while (my $f = readdir DIR){
+			# ignore symbolic links and non-Readable files:
+			next IW if (-l $f);
+			# if we consider . and .., we loop infinetly.
+			# and while we are at ignoring, we can ignore a few
+			# other things as well ;-)
+			if ($f =~ m#^\.\.?$# 
+					or $f =~ m#^\.svn$#
+					or $f =~ m#(?:~|\.swp)$#){
+#				print STDERR "Ignoring '$f'\n";
+				next;
+			}
+			$f = $fn . $f;
+			if (-d $f){
+				push @todo, $f;
+				process_dir($f);
+			} else {
+				process_file($f);
+			}
+		}
+		closedir DIR;
+	}
+}
+
+sub process_file($){
+	my $fn = shift;
+	my $new_fn = $fn;
+	$new_fn =~ s#^$source_prefix#$dest_prefix#;
+	if ($fn =~ m#\..?htm# && $fn !~ m#\.swp$#){
+		print STDERR "Processing File '$fn'...";
+
+
+		my %metadata = (ITEMS => [], 
+				FILES => [], 
+				CURRENT_ITEM => undef,
+				OPTIONS => {},
+				);
+		my $str = parse_file($fn, \%metadata);
+#		print Data::Dumper->Dump([\%metadata]);
+		my $header = "";
+		my $footer = "";
+#		warn $str;
+		unless (exists $metadata{OPTIONS}->{'no-header'}){
+			$header = parse_file($includes_prefix . "header" . $postfix, \%metadata);
+		}
+		unless (exists $metadata{OPTIONS}->{'no-footer'}){
+			$footer = parse_file($includes_prefix . "footer" . $postfix, \%metadata);
+		}
+		my ($tmp_fh, $tmp_name) = tempfile();
+		print $tmp_fh $header;
+		print $tmp_fh $str;
+		print $tmp_fh $footer;
+		close $tmp_fh;
+		if (compare($new_fn, $tmp_name) == 0){
+			print " not changed\n";
+		} else {
+			copy($tmp_name, $new_fn);
+			print " done\n";
+		}
+	} else {
+		if (compare($fn, $new_fn) == 0){
+			# do nothing
+		} else {
+			copy($fn, $new_fn);
+			print "Updated file $new_fn (not processed)\n";
+		}
+	}
+}
+
+sub parse_file {
+	my $fn = shift;
+	my $meta= shift;
+	my @tokens = read_and_lex_file($fn);
+#	print Data::Dumper->Dump(\@tokens);
+	return parse_tokens(\@tokens, $meta);
+}
+
+
+sub read_and_lex_file($) {
+	my $fn = shift;
+	my $meta = shift;
+
+	open(my $in_file, $fn) or die "Can't read '$fn': $!";
+	my $text = join "", <$in_file>;  
+	close $in_file;
+	my @tokens = lex($text, \@input_tokens);
+#	print Data::Dumper->Dump(\@tokens);
+
+	return @tokens;
+}
+
+sub parse_tokens {
+	my $tokens = shift;
+	my $meta = shift;
+	my $str = "";
+	if ($meta->{INSIDE_ITEM}){
+		$str .= p_text($tokens);
+	} else {
+		$str .= p_text($tokens, {BRACES_START => 1, BRACES_END => 1});
+	}
+	while(@$tokens 
+			and $tokens->[0]->[0] ne "TAG_END" 
+			and $tokens->[0]->[0] ne "BRACES_END"){
+#		print scalar @$tokens;
+#		print " tokens left\n";
+#		warn $str;
+
+		if ($tokens->[0]->[0] eq "TAG_START"){
+			p_expect($tokens, "TAG_START", $meta);
+			my $key = p_expect($tokens, 'KEYWORD', $meta);
+			if ($key eq "include") {
+				$str .= p_include($tokens, $meta);
+			} elsif ($key eq "menu"){
+				$str .= p_menu($tokens, $meta);
+			} elsif ($key eq "item") {
+				$str .= p_item($tokens, $meta);
+			} elsif ($key eq "option"){
+				p_option($tokens, $meta);
+			} elsif ($key eq "verbatim"){
+				$str .= p_verbatim($tokens, $meta);
+			} elsif ($key eq "endverbatim"){
+				parse_error("Unexpected tag 'endverbatim' without prior 'verbatim'");
+			}
+		} elsif ($tokens->[0]->[0] eq "BRACES_START") {
+#			print "Working on braces\n";
+			$str .= p_braces($tokens, $meta);
+		} else {
+			print "Don't know what to do with token $tokens->[0]->[0]\n";
+		}
+		if ($meta->{INSIDE_ITEM}){
+			$str .= p_text($tokens);
+		} else {
+			$str .= p_text($tokens, {BRACES_START => 1, BRACES_END => 1});
+		}
+
+	}
+	return $str;
+}
+
+# parse sub: anything is treated as normal text that does not start or end a
+# command
+# the second (optional) arg contains a hash of additional tokens that are
+# treated as plain text
+sub p_text {
+	my $tokens = shift;
+	my %a;
+	%a = %{$_[0]} if ($_[0]);
+	my $str = "";
+	my %allowed_tokens = (
+			KEYWORD	=> 1,
+			UNMATCHED => 1,
+			);
+
+	while (		$tokens 
+			and $tokens->[0] 
+			and $tokens->[0]->[0]
+			and ($allowed_tokens{$tokens->[0]->[0]}
+				or $a{$tokens->[0]->[0]})){
+		$str .= $tokens->[0]->[1];
+		shift @$tokens;
+	}
+	return $str;
+}
+
+# parse sub: parse an include statement.
+# note that TAG_START and the keyword "include" are already stripped
+sub p_include {
+	my $tokens = shift;
+	my $meta = shift;
+	# normally we'd expect an UNMATCHED token, but the user might choose
+	# a keyword as well as file name
+	if ($tokens->[0]->[0] eq "UNMATCHED" or $tokens->[0]->[0] eq "KEYWORD"){
+		my $fn = strip_ws($tokens->[0]->[1]);
+		$fn = $includes_prefix . $fn . $postfix;
+		shift @$tokens;
+		p_expect($tokens, "TAG_END", $meta);
+		# include file
+		my $m = dclone($meta);
+		push @{$m->{FILES}}, $fn;
+		return parse_file($fn, $m);
+	} else {
+		cloak("Expected: File name. Got: $tokens->[0]->[1]");
+	}
+}
+
+# parse sub: parse a 'menu' statement.
+# note that TAG_START and the keyword "menu" are already stripped
+sub p_menu {
+	my $tokens = shift;
+	my $meta = shift;
+	my $key = strip_ws(p_expect($tokens, "UNMATCHED", $meta));
+#	warn "menu string: $key";
+	my @words = split /\s+/, $key;
+	p_expect($tokens, "TAG_END", $meta);
+	my $menu_fn = shift @words;
+	$menu_fn = $menu_prefix . $menu_fn . $postfix;
+	my $m = dclone($meta);
+	push @{$m->{ITEMS}}, @words;
+	push @{$m->{FILES}}, $menu_fn;
+	return parse_file($menu_fn, $m);
+}
+
+# parse sub: parse an 'option' statement
+sub p_option {
+	my $tokens = shift;
+	my $meta = shift;
+	my $key = strip_ws(p_expect($tokens, "UNMATCHED", $meta));
+	my @words = split /\s+/, $key;
+	my $option_key = shift @words;
+	my $option_val = join " ", @words;
+	$meta->{OPTIONS}->{$option_key} = $option_val;
+	p_expect($tokens, "TAG_END", $meta);
+}
+
+#parse sub: parse an "item" statement
+sub p_item {
+	my $tokens = shift;
+	my $meta = shift;
+	my $content = p_expect($tokens, "UNMATCHED", $meta);
+	$content =~ s/^\s+//;
+	$content =~ m/^(\S+)/;
+	my $key = $1;
+	$content =~ s/^\S+//;
+
+	my $m = dclone($meta);
+#	print Data::Dumper->Dump([$m]);
+	if ($meta->{ITEMS}->[0] and $meta->{ITEMS}->[0] eq $key){
+#		print "Found matching item\n";
+		shift @{$m->{ITEMS}};
+		$m->{CURRENT_ITEM} = $key;
+
+	} else {
+#		print "Found non-matching item\n";
+		$m->{ITEMS} = [];
+		$m->{CURRENT_ITEM} = undef;
+	}
+	$m->{INSIDE_ITEM} = 1;
+	my $str = $content . parse_tokens($tokens, $m);
+	p_expect($tokens, "TAG_END", $meta);
+	return $str;
+
+}
+
+sub p_verbatim {
+	my $tokens = shift;
+	my $meta = shift;
+	my $str = "";
+	my $key = "";
+	if ($tokens->[0]->[0] eq "keyword"){
+		$key = p_expect($tokens, "KEYWORD", $meta);
+	} else {
+		$key = p_expect($tokens, "UNMATCHED", $meta);
+	}
+	p_expect($tokens, "TAG_END", $meta);
+	while (@$tokens){
+		if ($tokens->[0]->[0] eq "TAG_START" 
+				and $tokens->[1]->[0] eq "KEYWORD"
+				and $tokens->[1]->[1] eq "endverbatim"
+				and $tokens->[2]->[1] eq $key
+				and $tokens->[3]->[0] eq "TAG_END"){
+			# found end of verbatim section
+			p_expect($tokens, "TAG_START", $meta);
+			p_expect($tokens, "KEYWORD", $meta);
+			shift @$tokens;
+			p_expect($tokens, "TAG_END", $meta);
+			return $str;
+		} else {
+			$str .= $tokens->[0]->[1]; 
+			shift @$tokens;
+		}
+	}
+	die "[[[verbatim $key]]] opened but not closed until end of file\n";
+}
+
+sub p_braces {
+	my $tokens = shift;
+	my $meta = shift;
+	my $str = "";
+	p_expect($tokens,"BRACES_START", $meta);
+	if ($meta->{CURRENT_ITEM}){
+#		print "using text inside braces\n";
+		$str .= parse_tokens($tokens, $meta);
+	} else {
+		# discard the text between opening {{ and closing }} braces
+#		print "discarding text inside braces\n";
+		parse_tokens($tokens, $meta);
+	}
+	p_expect($tokens, "BRACES_END", $meta);
+	return $str;
+}
+
+# parse sub: expect a specific token, return its content or die if the
+# expectation was not met.
+sub p_expect {
+	my $tokens = shift;
+	my $expect = shift;
+	my $meta = shift;
+#	print Data::Dumper->Dump([$tokens]);
+	confess("Expected $expect, got nothing\n") unless (@$tokens);
+	confess("\$tokens not a array ref - this is most likely a programming error\n$internal_error_message") unless(ref($tokens) eq "ARRAY");
+	if ($tokens->[0]->[0] eq $expect){
+		my $e_val = shift;
+		if (not defined($e_val) or $e_val eq $tokens->[0]->[1]){
+			my $val =  $tokens->[0]->[1];
+			shift @$tokens;
+			return $val;
+		}
+	}
+	confess("Expected token $expect, got $tokens->[0]->[0]\n");
+}
+
+
+sub process_dir($) {
+	my $fn = shift;
+	print STDERR "Processing Directory '$fn'\n";
+	my $new_fn = $fn;
+	$new_fn =~ s#^$source_prefix#$dest_prefix/#;
+	mkdir $new_fn;
+}
+
+# strip leading and trailing whitespaces from a string 
+sub strip_ws($) {
+	my $s = shift;
+	$s =~ s/^\s+//g;
+	$s =~ s/\s+$//g;
+	return $s;
+}
+
+sub parse_error {
+	my $message = shift;
+	my $fn = shift;
+	print STDERR "Parse error in file '$fn': $message\n";
+	while ($fn = shift){
+		print STDERR "\t...included from file '$fn'\n";
+	}
+	exit 1;
+}

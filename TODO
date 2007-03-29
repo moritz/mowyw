@@ -1,0 +1,13 @@
+TODO:
+ * use configurable prefixes/postfixes 12/2006
+ * Add more magic ;-) 12/2006
+ * more testing 12/2006
+ * print includes pathes in error messages 12/2006
+ * make parser more robust 12/2006
+
+DONE:
+(items formerly on the todo list)
+ * modify parser so that {{ and }} loose their special meaning outside of an
+   [[item]] 12/2006, fixed 12/2006
+ * Implement nested menu items 12/2006, fixed 12/2006
+ * usefull examples 12/2006 fixed 01/2007

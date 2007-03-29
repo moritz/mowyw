@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" type="text/css" media="screen, projection" href="style.css" />
+<link rel="stylesheet" type="text/css" media="print" href="print.css" />
+<title>Mowyw example</title>
+</head>
+
+<body id="home">
+
+<div id="header">
+	<h1>Mowyw Example</h1>
+	<p>Lore Impsum</p>
+</div>
+<div id="nav-page">
+<h2>Quick access</h2>
+<ul>
+<li><a href="#nav-main">Site navigation</a></li>
+<li><a href="#nav-secondary">Recent articles</a></li>
+</ul>
+</div>
+
+<div id="content-main">
+
+
+<h2>A Word on the Design</h2>
+
+<p>This design is "stolen" from Dimiter Petrov, it is published on <a
+href="http://www.oswd.org/">oswd.org</a> under the name "Ordered
+Boxes".</p>
+
+<p>As far as I understand it is public domain, but he kindly asks anybody
+using this design to keep his name in the footer line.</p>
+
+<h2>Lore Ipsum</h2>
+
+<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed ut dui ac
+lacus egestas vehicula. Quisque faucibus, risus id consequat porta, orci
+ligula condimentum mi, ac commodo leo libero eget tortor. Maecenas a ligula in
+nibh luctus gravida. Praesent vehicula rhoncus tortor. <a href="#">Donec porta
+rutrum dui.</a> Donec dignissim congue mauris. Sed rhoncus laoreet sem. Nam
+dui pede, vestibulum convallis, posuere ut, dictum eu, diam. Phasellus nunc.
+Ut eget ante a ipsum porttitor scelerisque. Quisque auctor elit vitae massa.
+Vestibulum massa risus, gravida quis, hendrerit sit amet, bibendum sit amet,
+enim. Fusce nulla. Quisque vulputate metus vitae orci. Pellentesque
+at arcu. Ut sed neque.</p>
+
+<h2>Some Tests</h2>
+
+<p>These tests only tests some properties of the parser, you can safly ignore
+and delete them.</p>
+
+<h3>Parse test</h3>
+<p>Double braces should be ignored outside of an item: }} foo bar {{ {{.</p>
+
+<h3>Option parsing</h3>
+<p>Option items should be stripped, so the there should be no "option foo"
+output on the next line.</p>
+
+
+<h3>Verbose tests</h3>
+<p>Text between [[[verbatim $marker]]] and [[[endverbatim
+$marker]]] should be treated as plain text, e.g. tags inbetween should be
+ignored: [[[include foo]]].</p>
+
+</div>
+
+<div id="nav-main">
+<h2>Navigation</h2>
+<ul>
+ <li><a class="active" href="index.shtml">Home</a></li>
+ <li><a  href="foo.shtml">foo</a>
+</li>
+ <li><a  href="bar.shtml">bar</a></li>
+</ul>
+</div>
+
+
+<p id="footer">
+Powered by <a href="http://moritz.faui2k3.org/en/mowyw">mowyw</a> | <a href="#">Imprint</a> | Design by Dimiter Petrov
+</p>
+
+</body>
+</html>
