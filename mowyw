@@ -51,6 +51,10 @@ my $footer_content = undef;
 
 my $internal_error_message = "Please contact the Author at moritz\@faui2k3.org providing\nan example hwo to reproduce the error, including the complete error message";
 
+use Getopt::Long;
+my $make_behaviour = undef;
+my $result = GetOptions("make" => \$make_behaviour);
+
 my @input_tokens = (
 		[ 'TAG_START', 		qr/\[\[\[\s*/],
 		[ 'KEYWORD', 		qr/(?:include|menu|option|item|endverbatim|verbatim|comment|setvar|readvar|syntax|endsyntax)/],
@@ -103,6 +107,11 @@ sub process_file($){
 	$new_fn =~ s#^$source_prefix#$dest_prefix#;
 	if ($fn =~ m#\..?htm# && $fn !~ m#\.swp$#){
 		print STDERR "Processing File '$fn'...";
+
+		if ($make_behaviour and (stat($fn))[9] < (stat($new_fn))[9]){
+			print STDERR " already up-to-date\n";
+			return;
+		}
 
 
 		my %metadata = (ITEMS 		=> [], 
