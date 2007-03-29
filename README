@@ -6,19 +6,6 @@ moc is an offline CMS, that means it process sources files and generates
 output files from them, usually HTML files, but php files and others are
 possible as well (with some limitations though).
 
-SYNTAX CHANGE
--------------
-Version 0.0.3 and before used only double square brackets 
-(like [[include foo]]), but I noticed that double closing square brackets 
-are part of a typical CDATA declaration in xml files (and xhtml) like this:
-<style type="text/css">
-/*<![CDATA[*/
-	CSS Declarations
-/*]]>*/
-</style>
-
-Now tripple square brackets (like [[[include foo]]]) are used.
-
 
 SHORT HOWTO:
 -----------
@@ -68,6 +55,21 @@ Processing File 'source/index.html'... DONE.
 Now point your browser at source/index.html and see if it worked.
 Files not ending in .html, .htm, .shtml, .xhtml etc. are not processed, just
 copyied.
+
+You can change the default pathes with the following command line options to
+mowyw:
+	--postfix=html
+	--includes-prefix=incl/
+	--source-prefix=src/
+	--destination-prefix=out/
+	--menu-prefix=incl/menu/
+Note that if you whant the prefixes to be directories you have to include the
+trailing slash (or whatever the directory separator on your OS is).
+
+If you didn't change any heaer/footer/included files you can save processing
+time by adding the command line option '--make', in which case mowyw will
+compare the timestamps of the source file and designated output file and will
+only process the source file if it is newer.
 
 
 INCLUDES:
@@ -151,6 +153,37 @@ are simply stripped, but the text between them remains.
 If it is called with a different name, say [[[menu label2]]], the curly brackets
 and the text between them are stripped.
 
+SYNTAX HILIGHTING
+
+If you have both the Perl module Text::VimColor and Vim installed, you can use
+the follwing construct to automagically generate syntax hilighted HTML markup:
+
+<pre>[[[syntax perl]]]
+#!/usr/bin/perl
+
+sub blubb {
+	print "This sub only prints this stupid message\n";
+}
+[[[endsyntax]]]</pre>
+
+The only argument to 'syntax' is the language that the code is in, if you use
+a value that vim doesn't know it will try to guess the language.
+
+The standard CSS classes are:
+.synComment    { color: #0000FF }
+.synConstant   { color: #FF00FF }
+.synIdentifier { color: #008B8B }
+.synStatement  { color: #A52A2A ; font-weight: bold }
+.synPreProc    { color: #A020F0 }
+.synType       { color: #2E8B57 ; font-weight: bold }
+.synSpecial    { color: #6A5ACD }
+.synUnderlined { color: #000000 ; text-decoration: underline }
+.synError      { color: #FFFFFF ; background: #FF0000 none }
+.synTodo       { color: #0000FF ; background: #FFFF00 none }
+
+(taken from Text::VimColor)
+
+
 VERBATIM OUTPUT
 
 If your website includes string like [[[ or ]]] etc., you can use the
@@ -167,6 +200,13 @@ note that the ']]]' will not cause any harm.
 the name in the verbatim and in the endverbatim-package have to agree exactly
 and my consist of alphabetic characters and numbers.
 
+COMMENTS
+
+You can exclude parts entirly from showing up in the output by putting them
+inside a comment:
+[[[comment anything inside here will not show up in the output]]]
+In a comment everything but ']]]' is allowed.
+
 
 OMITTING HEADER AND FOOTER
 
@@ -175,6 +215,20 @@ If you include a line like this:
 the header is _not_ prepended as usual.
 You can achieve the following functionality for the footer with the line
 [[[option no-footer]]]
+
+
+SYNTAX CHANGE
+-------------
+Version 0.0.3 and before used only double square brackets 
+(like [[include foo]]), but I noticed that double closing square brackets 
+are part of a typical CDATA declaration in xml files (and xhtml) like this:
+<style type="text/css">
+/*<![CDATA[*/
+	CSS Declarations
+/*]]>*/
+</style>
+
+Now tripple square brackets (like [[[include foo]]]) are used.
 
 
 LIMITATIONS & BUGS

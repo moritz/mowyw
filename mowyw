@@ -53,7 +53,14 @@ my $internal_error_message = "Please contact the Author at moritz\@faui2k3.org p
 
 use Getopt::Long;
 my $make_behaviour = undef;
-my $result = GetOptions("make" => \$make_behaviour);
+my $result = GetOptions(
+		"make" 			=> \$make_behaviour,
+		"postfix=s" 		=> \$postfix,
+		"includes-prefix=s" 	=> \$includes_prefix,
+		"menu-prefix=s"		=> \$menu_prefix,
+		"destination-prefix=s"	=> \$dest_prefix,
+		"source-prefix=s"	=> \$source_prefix,
+		);
 
 my @input_tokens = (
 		[ 'TAG_START', 		qr/\[\[\[\s*/],
