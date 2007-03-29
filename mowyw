@@ -53,7 +53,7 @@ my $internal_error_message = "Please contact the Author at moritz\@faui2k3.org p
 
 my @input_tokens = (
 		[ 'TAG_START', 		qr/\[\[\[\s*/],
-		[ 'KEYWORD', 		qr/(?:include|menu|option|item|endverbatim|verbatim)/],
+		[ 'KEYWORD', 		qr/(?:include|menu|option|item|endverbatim|verbatim|comment|setvar|readvar|syntax|endsyntax)/],
 		[ 'TAG_END',		qr/\s*\]\]\]/],
 		[ 'BRACES_START', 	qr/{{/],
 		[ 'BRACES_END',	 	qr/}}/],
@@ -105,10 +105,11 @@ sub process_file($){
 		print STDERR "Processing File '$fn'...";
 
 
-		my %metadata = (ITEMS => [], 
-				FILES => [], 
-				CURRENT_ITEM => undef,
-				OPTIONS => {},
+		my %metadata = (ITEMS 		=> [], 
+				FILES 		=> [$fn], 
+				CURRENT_ITEM 	=> undef,
+				OPTIONS 	=> {},
+				VARS		=> {},
 				);
 		my $str = parse_file($fn, \%metadata);
 #		print Data::Dumper->Dump([\%metadata]);
@@ -116,9 +117,13 @@ sub process_file($){
 		my $footer = "";
 #		warn $str;
 		unless (exists $metadata{OPTIONS}->{'no-header'}){
-			$header = parse_file($includes_prefix . "header" . $postfix, \%metadata);
+			my $m = dclone(\%metadata);
+			unshift @{$m->{FILES}}, $includes_prefix . "header" . $postfix;
+			$header = parse_file($includes_prefix . "header" . $postfix, $m);
 		}
 		unless (exists $metadata{OPTIONS}->{'no-footer'}){
+			my $m = dclone(\%metadata);
+			unshift @{$m->{FILES}}, $includes_prefix . "footer" . $postfix;
 			$footer = parse_file($includes_prefix . "footer" . $postfix, \%metadata);
 		}
 		my ($tmp_fh, $tmp_name) = tempfile();
@@ -183,6 +188,7 @@ sub parse_tokens {
 		if ($tokens->[0]->[0] eq "TAG_START"){
 			p_expect($tokens, "TAG_START", $meta);
 			my $key = p_expect($tokens, 'KEYWORD', $meta);
+			# TODO: implement this as a hash
 			if ($key eq "include") {
 				$str .= p_include($tokens, $meta);
 			} elsif ($key eq "menu"){
@@ -194,7 +200,15 @@ sub parse_tokens {
 			} elsif ($key eq "verbatim"){
 				$str .= p_verbatim($tokens, $meta);
 			} elsif ($key eq "endverbatim"){
-				parse_error("Unexpected tag 'endverbatim' without prior 'verbatim'");
+				parse_error("Unexpected tag 'endverbatim' without prior 'verbatim'", @{$meta->{FILES}});
+			} elsif ($key eq "comment"){
+				$str .= p_comment($tokens, $meta);
+			} elsif ($key eq "setvar"){
+				$str .= p_setvar($tokens, $meta);
+			} elsif ($key eq "readvar"){
+				$str .= p_readvar($tokens, $meta);
+			} elsif ($key eq "syntax"){
+				$str .= p_syntax($tokens, $meta);
 			}
 		} elsif ($tokens->[0]->[0] eq "BRACES_START") {
 #			print "Working on braces\n";
@@ -251,7 +265,7 @@ sub p_include {
 		p_expect($tokens, "TAG_END", $meta);
 		# include file
 		my $m = dclone($meta);
-		push @{$m->{FILES}}, $fn;
+		unshift @{$m->{FILES}}, $fn;
 		return parse_file($fn, $m);
 	} else {
 		cloak("Expected: File name. Got: $tokens->[0]->[1]");
@@ -271,7 +285,7 @@ sub p_menu {
 	$menu_fn = $menu_prefix . $menu_fn . $postfix;
 	my $m = dclone($meta);
 	push @{$m->{ITEMS}}, @words;
-	push @{$m->{FILES}}, $menu_fn;
+	unshift @{$m->{FILES}}, $menu_fn;
 	return parse_file($menu_fn, $m);
 }
 
@@ -284,6 +298,7 @@ sub p_option {
 	my $option_key = shift @words;
 	my $option_val = join " ", @words;
 	$meta->{OPTIONS}->{$option_key} = $option_val;
+	warn "p_option called\n";
 	p_expect($tokens, "TAG_END", $meta);
 }
 
@@ -347,6 +362,17 @@ sub p_verbatim {
 	die "[[[verbatim $key]]] opened but not closed until end of file\n";
 }
 
+sub p_comment {
+	my $tokens = shift;
+	my $meta = shift;
+	while ($tokens->[0]->[0] ne "TAG_END"){
+		shift @$tokens;
+	}
+	p_expect($tokens, "TAG_END", $meta);
+	return "";
+}
+
+
 sub p_braces {
 	my $tokens = shift;
 	my $meta = shift;
@@ -364,6 +390,62 @@ sub p_braces {
 	return $str;
 }
 
+sub p_setvar {
+	my $tokens = shift;
+	my $meta = shift;
+	my $str = "";
+	while ($tokens->[0]->[0] ne "TAG_END"){
+		$str .= $tokens->[0]->[1];
+		shift @$tokens;
+	}
+	p_expect($tokens, "TAG_END", $meta);
+	$str = strip_ws($str);
+	$str =~ m#^(\S+)\s#;
+	my $name = $1;
+	my $value = $str;
+	$value =~ s/^\S+\s+//;
+	$meta->{VARS}->{$name} = $value;
+	return "";
+}
+
+sub p_readvar {
+	my $tokens = shift;
+	my $meta = shift;
+	my $name = strip_ws($tokens->[0]->[1]);
+	shift @$tokens;
+	p_expect($tokens, "TAG_END", $meta);
+	if (exists $meta->{VARS}->{$name}){
+		return $meta->{VARS}->{$name};
+	} else {
+		print STDERR "Trying to access variable '$name' which is not defined\n";
+		return "";
+	}
+}
+
+sub p_syntax {
+	my $tokens = shift;
+	my $meta = shift;
+	my $lang = shift @$tokens;
+	$lang = strip_ws($lang->[1]);
+	p_expect($tokens, "TAG_END", $meta);
+	my $str = "";
+	while (not ($tokens->[0]->[0] eq "TAG_START" and $tokens->[1]->[1] eq "endsyntax" and $tokens->[2]->[0] eq "TAG_END")){
+		$str .= $tokens->[0]->[1];
+		shift @$tokens;
+	}
+	p_expect($tokens, "TAG_START", $meta);
+	p_expect($tokens, "KEYWORD", $meta);
+	p_expect($tokens, "TAG_END", $meta);
+
+	require Text::VimColor;
+	my $syn = Text::VimColor->new(
+			filetype 	=> $lang,
+			string		=> $str,
+			);
+#	warn "Hilighting with language '$lang'";
+	return $syn->html;
+}
+
 # parse sub: expect a specific token, return its content or die if the
 # expectation was not met.
 sub p_expect {
@@ -371,7 +453,7 @@ sub p_expect {
 	my $expect = shift;
 	my $meta = shift;
 #	print Data::Dumper->Dump([$tokens]);
-	confess("Expected $expect, got nothing\n") unless (@$tokens);
+	parse_error("Unexpected End of File, expected $expect", @{$meta->{FILES}}) unless (@$tokens);
 	confess("\$tokens not a array ref - this is most likely a programming error\n$internal_error_message") unless(ref($tokens) eq "ARRAY");
 	if ($tokens->[0]->[0] eq $expect){
 		my $e_val = shift;
@@ -381,7 +463,7 @@ sub p_expect {
 			return $val;
 		}
 	}
-	confess("Expected token $expect, got $tokens->[0]->[0]\n");
+	parse_error("Expected token $expect, got $tokens->[0]->[0]\n", @{$meta->{FILES}});
 }
 
 
