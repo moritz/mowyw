@@ -115,7 +115,7 @@ sub process_file($){
 	if ($fn =~ m#\..?htm# && $fn !~ m#\.swp$#){
 		print STDERR "Processing File '$fn'...";
 
-		if ($make_behaviour and (stat($fn))[9] < (stat($new_fn))[9]){
+		if ($make_behaviour and  -e $new_fn and (stat($fn))[9] < (stat($new_fn))[9]){
 			print STDERR " already up-to-date\n";
 			return;
 		}
@@ -323,6 +323,7 @@ sub p_option {
 	my $option_val = join " ", @words;
 	$meta->{OPTIONS}->{$option_key} = $option_val;
 	p_expect($tokens, "TAG_END", $meta);
+	return "";
 }
 
 #parse sub: parse an "item" statement
