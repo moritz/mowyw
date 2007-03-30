@@ -322,7 +322,6 @@ sub p_option {
 	my $option_key = shift @words;
 	my $option_val = join " ", @words;
 	$meta->{OPTIONS}->{$option_key} = $option_val;
-	warn "p_option called\n";
 	p_expect($tokens, "TAG_END", $meta);
 }
 
