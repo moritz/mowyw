@@ -217,6 +217,38 @@ You can achieve the following functionality for the footer with the line
 [[[option no-footer]]]
 
 
+SETTING AND READING VARIABLES
+
+Suppose you want to add a different <title> to every page, but you want all
+your HTML header to be in one specific place.
+A way to achive this is with the setvar and readvar constructs. Place this in
+your header file:
+<html>
+	<head><title>[[[readvar title]]]</title>/head>
+	<body>
+(of course you should use a doctype ;-)
+And then in each source file you can use
+[[[setvar title This is the title of this stupid page]]]
+to set the title. If you forget to set a variable before using it  a warning
+will be emitted.
+
+Scoping:
+Variables are scoped in the sense that when you enter a new scope (by using
+include, menu, item or automatically by including the header and footer) the
+variables from the higher level scope are still available, but if you modify
+them in local scope they will still be unmodified in the outer scope.
+Example:
+	[[[setvar foo bar]]]
+	[[[include somefile]]]
+	[[[redavar foo]]] 	--- gives bar
+In file somfile:
+	[[[readvar foo]]] 	--- gives bar
+	[[[setvar foo baz]]]	
+	[[[readvar foo]]]	--- gives baz
+Therefore you can change the header's and footer's output by defining
+variables in the main source file, but not the other way round.
+
+
 SYNTAX CHANGE
 -------------
 Version 0.0.3 and before used only double square brackets 
