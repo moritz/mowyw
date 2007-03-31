@@ -113,12 +113,11 @@ sub process_file($){
 	my $new_fn = $fn;
 	$new_fn =~ s#^$source_prefix#$dest_prefix#;
 	if ($fn =~ m#\..?htm# && $fn !~ m#\.swp$#){
-		print STDERR "Processing File '$fn'...";
 
 		if ($make_behaviour and  -e $new_fn and (stat($fn))[9] < (stat($new_fn))[9]){
-			print STDERR " already up-to-date\n";
 			return;
 		}
+		print STDERR "Processing File '$fn'...";
 
 
 		my %metadata = (ITEMS 		=> [], 
@@ -148,10 +147,10 @@ sub process_file($){
 		print $tmp_fh $footer;
 		close $tmp_fh;
 		if (compare($new_fn, $tmp_name) == 0){
-			print " not changed\n";
+			print STDERR " not changed\n";
 		} else {
 			copy($tmp_name, $new_fn);
-			print " done\n";
+			print STDERR " done\n";
 		}
 	} else {
 		if (compare($fn, $new_fn) == 0){
@@ -453,7 +452,7 @@ sub p_syntax {
 	$lang = strip_ws($lang->[1]);
 	p_expect($tokens, "TAG_END", $meta);
 	my $str = "";
-	while (not ($tokens->[0]->[0] eq "TAG_START" and $tokens->[1]->[1] eq "endsyntax" and $tokens->[2]->[0] eq "TAG_END")){
+	while ($tokens->[0] and  not ($tokens->[0]->[0] eq "TAG_START" and $tokens->[1]->[1] eq "endsyntax" and $tokens->[2]->[0] eq "TAG_END")){
 		$str .= $tokens->[0]->[1];
 		shift @$tokens;
 	}
@@ -474,6 +473,7 @@ sub p_syntax {
 		$str =~ s#>#&gt;#g;
 		return $str;
 	} else {
+		print STDERR ".";
 		my $syn = Text::VimColor->new(
 				filetype 	=> $lang,
 				string		=> $str,
