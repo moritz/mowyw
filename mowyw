@@ -479,7 +479,7 @@ sub p_syntax {
 			$str =~ s#<#&lt;#g;
 			$str =~ s#>#&gt;#g;
 		} else {
-			$str = HTML::Entities->encode_entities($str);
+			$str = encode_entities($str);
 		}
 		return $str;
 	} else {
