@@ -468,19 +468,10 @@ sub p_syntax {
 	if ($@){
 		# require was not successfull 
 		print STDERR " Not syntax hilighting, Text::VimColor not found\n";
-		# try to escape special chars with HTML::Entities
-		eval {
-			no warnings "all";
-			require HTML::Entities;
-		};
-		if ($@){
-			# even that failed.
-			$str =~ s#&#&amp;#g;
-			$str =~ s#<#&lt;#g;
-			$str =~ s#>#&gt;#g;
-		} else {
-			$str = encode_entities($str);
-		}
+		# encode at least some special chars "by hand"
+		$str =~ s#&#&amp;#g;
+		$str =~ s#<#&lt;#g;
+		$str =~ s#>#&gt;#g;
 		return $str;
 	} else {
 		my $syn = Text::VimColor->new(
