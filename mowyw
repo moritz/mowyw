@@ -461,13 +461,34 @@ sub p_syntax {
 	p_expect($tokens, "KEYWORD", $meta);
 	p_expect($tokens, "TAG_END", $meta);
 
-	require Text::VimColor;
-	my $syn = Text::VimColor->new(
-			filetype 	=> $lang,
-			string		=> $str,
-			);
-#	warn "Hilighting with language '$lang'";
-	return $syn->html;
+	eval { 
+		no warnings "all";
+		require Text::VimColor; 
+	};
+	if ($@){
+		# require was not successfull 
+		print STDERR " Not syntax hilighting, Text::VimColor not found\n";
+		# try to escape special chars with HTML::Entities
+		eval {
+			no warnings "all";
+			require HTML::Entities;
+		};
+		if ($@){
+			# even that failed.
+			$str =~ s#&#&amp;#g;
+			$str =~ s#<#&lt;#g;
+			$str =~ s#>#&gt;#g;
+		} else {
+			$str = HTML::Entities->encode_entities($str);
+		}
+		return $str;
+	} else {
+		my $syn = Text::VimColor->new(
+				filetype 	=> $lang,
+				string		=> $str,
+				);
+		return $syn->html;
+	}
 }
 
 # parse sub: expect a specific token, return its content or die if the
