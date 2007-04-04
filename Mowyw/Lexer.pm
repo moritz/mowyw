@@ -55,7 +55,7 @@ our %EXPORT_TAGS = (":all" => \@EXPORT);
 
 sub lex($$){
 	my ($text, $tokens) = @_;
-	return () unless ($text);
+	return () unless (length $text);
 	my @res;
 	while (length($text) > 0){
 		my $matched = 0;

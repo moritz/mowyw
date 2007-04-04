@@ -1,3 +1,9 @@
+mowyw (0.3.0)
+	* mowyw: Added support for syntax highliting, variables and comments
+	* README: update accordingly
+	* example/source/bar.shtml: added syntax hilighting example
+	* example/source/style.css: added syntax hilighting classes
+	* Mowyw/Lexer.pm: fixed handling of "0" string
 mowyw (0.2.0) 
 	* Mowyw/Lexer.pm: added a separate lexer
 	* mowyw: (nearly) complete rewrite using a recursive-descending parser

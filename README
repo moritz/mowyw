@@ -166,6 +166,9 @@ sub blubb {
 }
 [[[endsyntax]]]</pre>
 
+If you don't have Text::VimColor installed, the characters '&', '<' and '>'
+will still be automatically escaped.
+
 The only argument to 'syntax' is the language that the code is in, if you use
 a value that vim doesn't know it will try to guess the language.
 
