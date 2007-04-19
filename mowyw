@@ -33,7 +33,7 @@ use Carp;
 use Storable qw(dclone);
 
 use Encode;
-use Data::Dumper;
+#use Data::Dumper;
 
 sub process_file($);
 sub process_dir($);
