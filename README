@@ -81,10 +81,16 @@ Just use the line
 
 [[[include foo]]]
 
+or 
+
+[% include foo %]
+
 in your files, and the line will be replaced with the  content of the file 
 `includes/foo'. It works pretty much like #inlcude "includes/foo" with a C pre
 processor or <!-- #include virtual="includes/foo"--> with Server Side Includes
 (SSI).
+
+Note that everywhere the [[[ ... ]]] delimiters can be exchanged by [% .. %].
 
 MENUS:
 

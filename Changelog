@@ -1,3 +1,9 @@
+mowyw (0.4.0)
+	* mowyw: Added support for new delimiters: [% ... %] instead of [[[
+	  ... ]]]. Currently they are interchangable, so [% .. ]]] works, but
+	  this is considered a bug rather than a feature.
+	* README: update accordingly
+	* example/source/foo2.shtml: added example [% ... %] tags
 mowyw (0.3.0)
 	* mowyw: Added support for syntax highliting, variables and comments
 	* README: update accordingly

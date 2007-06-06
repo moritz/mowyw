@@ -65,8 +65,10 @@ my $result = GetOptions(
 
 my @input_tokens = (
 		[ 'TAG_START', 		qr/\[\[\[\s*/],
-		[ 'KEYWORD', 		qr/(?:include|menu|option|item|endverbatim|verbatim|comment|setvar|readvar|syntax|endsyntax)/],
+		[ 'TAG_START', 		qr/\[\%\s*/],
+		[ 'KEYWORD', 		qr/(?:include|menu|option|item|endverbatim|verbatim|comment|setvar|readvar|synatxfile|syntax|endsyntax)/],
 		[ 'TAG_END',		qr/\s*\]\]\]/],
+		[ 'TAG_END',		qr/\s*\%\]/],
 		[ 'BRACES_START', 	qr/{{/],
 		[ 'BRACES_END',	 	qr/}}/],
 	);
@@ -204,6 +206,7 @@ sub parse_tokens {
 		if ($tokens->[0]->[0] eq "TAG_START"){
 			p_expect($tokens, "TAG_START", $meta);
 			my $key = p_expect($tokens, 'KEYWORD', $meta);
+#			warn "Found keyword $key\n";
 			my %dispatch = (
 				include 	=> \&p_include,
 				menu		=> \&p_menu,
@@ -220,7 +223,8 @@ sub parse_tokens {
 				setvar		=> \&p_setvar,
 				readvar		=> \&p_readvar,
 				syntax		=> \&p_syntax,
-				endvsyntax	=> sub {
+				syntaxfile	=> \&p_syntaxfile,
+				endsyntax	=> sub {
 			#  p_syntax reads until it finds endsyntax, so it
 			#  may never occur here
 			my ($tokens, $meta) = @_;
@@ -284,6 +288,7 @@ sub p_include {
 	# a keyword as well as file name
 	if ($tokens->[0]->[0] eq "UNMATCHED" or $tokens->[0]->[0] eq "KEYWORD"){
 		my $fn = strip_ws($tokens->[0]->[1]);
+#		warn "Including file $fn\n";
 		$fn = $includes_prefix . $fn . $postfix;
 		shift @$tokens;
 		p_expect($tokens, "TAG_END", $meta);
@@ -292,7 +297,7 @@ sub p_include {
 		unshift @{$m->{FILES}}, $fn;
 		return parse_file($fn, $m);
 	} else {
-		cloak("Expected: File name. Got: $tokens->[0]->[1]");
+		confess("Expected: File name. Got: $tokens->[0]->[1]");
 	}
 }
 
@@ -446,6 +451,19 @@ sub p_readvar {
 	}
 }
 
+sub p_syntaxfile {
+	my $tokens = shift;
+	my $meta = shift;
+	my $tag_content = shift @$tokens;
+	$tag_content = strip_ws($tag_content->[1]);
+	p_expect($tokens, "TAG_END", $meta);
+	my @t = split m/\s+/, $tag_content;
+	if (scalar @t != 2){
+		parse_error("Usage of syntaxfile tag: [[[syntaxfile <filename> <language>", @{$meta->{FILES}});
+	}
+
+}
+
 sub p_syntax {
 	my $tokens = shift;
 	my $meta = shift;
@@ -461,6 +479,11 @@ sub p_syntax {
 	p_expect($tokens, "KEYWORD", $meta);
 	p_expect($tokens, "TAG_END", $meta);
 
+	return do_hilight($str, $lang);
+}
+
+sub do_hilight {
+	my ($str, $lang) = @_;
 	eval { 
 		no warnings "all";
 		require Text::VimColor; 
