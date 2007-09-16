@@ -73,6 +73,11 @@ my @input_tokens = (
 		[ 'BRACES_END',	 	qr/}}/],
 	);
 
+my %start_end = (
+		'[[['	=> ']]]',
+		'[%'	=> '%]',
+		);
+
 main();
 #my %metadata = (ITEMS => [], 
 #		FILES => [], 
@@ -204,7 +209,7 @@ sub parse_tokens {
 #		warn $str;
 
 		if ($tokens->[0]->[0] eq "TAG_START"){
-			p_expect($tokens, "TAG_START", $meta);
+			my $start = p_expect($tokens, "TAG_START", $meta);
 			my $key = p_expect($tokens, 'KEYWORD', $meta);
 #			warn "Found keyword $key\n";
 			my %dispatch = (
