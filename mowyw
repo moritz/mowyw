@@ -24,7 +24,7 @@
 use warnings;
 use strict;
 use FindBin;
-use lib "$FindBin::Bin";
+use lib "$FindBin::Bin/lib";
 use File::Copy;
 use File::Temp qw(tempfile);
 use File::Compare;
@@ -33,40 +33,57 @@ use Carp;
 use Storable qw(dclone);
 
 use Encode;
-#use Data::Dumper;
+use Data::Dumper;
 
-sub process_file($);
-sub process_dir($);
+sub process_file;
+sub process_dir;
 sub process_menu_tree;
 sub read_and_lex_file($);
 
-my $includes_prefix = "includes/";
-my $source_prefix = "source/";
-my $dest_prefix = "online/";
-my $menu_prefix = $includes_prefix . "menu-";
-my $postfix = "";
+my %config = (
+		default => {
+            include	=> 'includes/',
+            source	=> 'source/',
+            online	=> 'online/',
+			postfix	=> '',
+        },
+    );
+$config{default}{menu} = $config{default}{include} . 'menu-';
 
 my @todo = qw(source);
 my $header_content = undef;
 my $footer_content = undef;
 
-my $internal_error_message = "Please contact the Author at moritz\@faui2k3.org providing\nan example hwo to reproduce the error, including the complete error message";
+my $internal_error_message = "Please contact the Author at moritz\@faui2k3.org providing\nan example how to reproduce the error, including the complete error message";
 
 use Getopt::Long;
 my $make_behaviour = undef;
 my $result = GetOptions(
-		"make" 			=> \$make_behaviour,
-		"postfix=s" 		=> \$postfix,
-		"includes-prefix=s" 	=> \$includes_prefix,
-		"menu-prefix=s"		=> \$menu_prefix,
-		"destination-prefix=s"	=> \$dest_prefix,
-		"source-prefix=s"	=> \$source_prefix,
-		);
+        "make" 			        => \$make_behaviour,
+        "postfix=s" 		    => \$config{default}{postfix},
+        "includes-prefix=s" 	=> \$config{default}{include},
+        "menu-prefix=s"		    => \$config{default}{menu},
+        "destination-prefix=s"	=> \$config{default}{online},
+        "source-prefix=s"	    => \$config{default}{source},
+    );
 
 my @input_tokens = (
 		[ 'TAG_START', 		qr/\[\[\[\s*/],
 		[ 'TAG_START', 		qr/\[\%\s*/],
-		[ 'KEYWORD', 		qr/(?:include|menu|option|item|endverbatim|verbatim|comment|setvar|readvar|synatxfile|syntax|endsyntax)/],
+		[ 'KEYWORD', 		qr/(?:
+             include
+            |menu
+            |option
+            |item
+            |endverbatim
+            |verbatim
+            |comment
+            |setvar
+            |readvar
+            |synatxfile
+            |syntax
+            |endsyntax
+            )/x                         ],
 		[ 'TAG_END',		qr/\s*\]\]\]/],
 		[ 'TAG_END',		qr/\s*\%\]/],
 		[ 'BRACES_START', 	qr/{{/],
@@ -78,6 +95,10 @@ my %start_end = (
 		'[%'	=> '%]',
 		);
 
+$config{per_fn} = get_config();
+
+#print Dumper \%config;
+
 main();
 #my %metadata = (ITEMS => [], 
 #		FILES => [], 
@@ -87,6 +108,63 @@ main();
 #my $str = parse_file("includes/head2", \%metadata);
 #print $str;
 
+sub get_include_filename {
+	my ($type, $base_fn, $source_fn) = @_;
+    confess "Usage: get_include_filename(\$type, \$base, \$source)" unless $source_fn;
+    # $type should be one of qw(include menu online)
+	my $re;
+	for (keys %{$config{per_fn}}){
+		if ($source_fn =~ m/$_/){
+			$re = $_;
+#            warn "Found regex '$re'";
+			last;
+		}
+	}
+    my $prefix  = $config{default}{$type};
+    my $postfix = $config{default}{postfix};
+    if (defined $re){
+        $prefix  = $config{per_fn}{$re}{$type}   if defined $config{per_fn}{$re}{$type};
+        $postfix = $config{per_fn}{$re}{postfix} if defined $config{per_fn}{$re}{postfix};
+    }
+
+    return $prefix . $base_fn . $postfix;
+}
+
+sub get_config {
+	my $cfg_file = 'mowyw.conf';
+	if (-e $cfg_file) {
+		eval {
+			require Config::File;
+			Config::File->import qw(read_config_file);
+		};
+		if ($@){
+			warn "Can't read config file because Config::File is not available\n";
+            return {};
+		} else {
+            my $conf_hash = read_config_file($cfg_file); 
+            return transform_conf_hash($conf_hash);
+        }
+	} else {
+		print "No config file '$cfg_file'\n";
+        return {};
+	}
+}
+
+sub transform_conf_hash {
+	my ($h) = @_;
+	my %nh;
+#	no warnings 'uninitialized';
+    my %d = %{$config{default}};
+	for (keys %{$h->{MATCH}}){
+		my $key = $h->{MATCH}{$_};
+        for my $feat (qw(include menu postfix online)){
+            $nh{$key}{$feat} = 
+                defined $h->{ uc $feat }{$_} ?  $h->{ uc $feat }{$_} : $d{$feat};
+        }
+	}
+#    print Dumper \%nh;
+	return \%nh;
+}
 
 sub main {
 	while (my $fn = pop @todo){
@@ -98,10 +176,11 @@ sub main {
 			# if we consider . and .., we loop infinetly.
 			# and while we are at ignoring, we can ignore a few
 			# other things as well ;-)
-			if ($f =~ m#^\.\.?$# 
-					or $f =~ m#^\.svn$#
-					or $f =~ m#(?:~|\.swp)$#){
-#				print STDERR "Ignoring '$f'\n";
+			if (
+                       $f eq '..'  
+                    or $f eq '.'
+                    or $f eq  '.svn'
+                    or $f =~ m{(?:~|\.swp)$}){
 				next;
 			}
 			$f = $fn . $f;
@@ -116,10 +195,32 @@ sub main {
 	}
 }
 
-sub process_file($){
-	my $fn = shift;
+sub get_online_fn {
+    my $fn = shift;
 	my $new_fn = $fn;
-	$new_fn =~ s#^$source_prefix#$dest_prefix#;
+	$new_fn =~ s{^$config{default}{source}}{};
+    {
+        my $found = 0;
+        for ( keys %{$config{per_fn}} ){
+            if ( $new_fn =~ m/$_/ ){
+                $found = 1;
+                $new_fn = $config{per_fn}{$_}{online} . $new_fn;
+                last
+            }
+        }
+        if ($found == 0){
+            $new_fn = $config{default}{online} . $new_fn;
+        }
+    }
+    return $new_fn;
+
+}
+
+sub process_file {
+	my $fn = shift;
+
+    my $new_fn = get_online_fn($fn);
+
 	if ($fn =~ m#\..?htm# && $fn !~ m#\.swp$#){
 
 		if ($make_behaviour and  -e $new_fn and (stat($fn))[9] < (stat($new_fn))[9]){
@@ -138,16 +239,19 @@ sub process_file($){
 #		print Data::Dumper->Dump([\%metadata]);
 		my $header = "";
 		my $footer = "";
+
 #		warn $str;
 		unless (exists $metadata{OPTIONS}->{'no-header'}){
 			my $m = dclone(\%metadata);
-			unshift @{$m->{FILES}}, $includes_prefix . "header" . $postfix;
-			$header = parse_file($includes_prefix . "header" . $postfix, $m);
+            my $header_fn = get_include_filename('include', 'header', $fn);
+			unshift @{$m->{FILES}}, $header_fn;
+			$header = parse_file($header_fn, $m);
 		}
 		unless (exists $metadata{OPTIONS}->{'no-footer'}){
 			my $m = dclone(\%metadata);
-			unshift @{$m->{FILES}}, $includes_prefix . "footer" . $postfix;
-			$footer = parse_file($includes_prefix . "footer" . $postfix, \%metadata);
+            my $footer_fn = get_include_filename('include', 'footer', $fn);
+			unshift @{$m->{FILES}}, $footer_fn;
+			$footer = parse_file($footer_fn, \%metadata);
 		}
 		my ($tmp_fh, $tmp_name) = tempfile();
 		print $tmp_fh $header;
@@ -294,7 +398,7 @@ sub p_include {
 	if ($tokens->[0]->[0] eq "UNMATCHED" or $tokens->[0]->[0] eq "KEYWORD"){
 		my $fn = strip_ws($tokens->[0]->[1]);
 #		warn "Including file $fn\n";
-		$fn = $includes_prefix . $fn . $postfix;
+        $fn = get_include_filename('include', $fn, $meta->{FILES}->[-1]);
 		shift @$tokens;
 		p_expect($tokens, "TAG_END", $meta);
 		# include file
@@ -311,12 +415,12 @@ sub p_include {
 sub p_menu {
 	my $tokens = shift;
 	my $meta = shift;
+#    print Dumper $meta;
 	my $key = strip_ws(p_expect($tokens, "UNMATCHED", $meta));
-#	warn "menu string: $key";
 	my @words = split /\s+/, $key;
 	p_expect($tokens, "TAG_END", $meta);
 	my $menu_fn = shift @words;
-	$menu_fn = $menu_prefix . $menu_fn . $postfix;
+    $menu_fn = get_include_filename('menu', $menu_fn, $meta->{FILES}->[-1]);
 	my $m = dclone($meta);
 	push @{$m->{ITEMS}}, @words;
 	unshift @{$m->{FILES}}, $menu_fn;
@@ -349,12 +453,10 @@ sub p_item {
 	my $m = dclone($meta);
 #	print Data::Dumper->Dump([$m]);
 	if ($meta->{ITEMS}->[0] and $meta->{ITEMS}->[0] eq $key){
-#		print "Found matching item\n";
 		shift @{$m->{ITEMS}};
 		$m->{CURRENT_ITEM} = $key;
 
 	} else {
-#		print "Found non-matching item\n";
 		$m->{ITEMS} = [];
 		$m->{CURRENT_ITEM} = undef;
 	}
@@ -517,7 +619,6 @@ sub p_expect {
 	my $tokens = shift;
 	my $expect = shift;
 	my $meta = shift;
-#	print Data::Dumper->Dump([$tokens]);
 	parse_error("Unexpected End of File, expected $expect", @{$meta->{FILES}}) unless (@$tokens);
 	confess("\$tokens not a array ref - this is most likely a programming error\n$internal_error_message") unless(ref($tokens) eq "ARRAY");
 	if ($tokens->[0]->[0] eq $expect){
@@ -532,11 +633,10 @@ sub p_expect {
 }
 
 
-sub process_dir($) {
+sub process_dir {
 	my $fn = shift;
 	print STDERR "Processing Directory '$fn'\n";
-	my $new_fn = $fn;
-	$new_fn =~ s#^$source_prefix#$dest_prefix/#;
+	my $new_fn = get_online_fn($fn);
 	mkdir $new_fn;
 }
 
@@ -555,6 +655,8 @@ sub parse_error {
 	while ($fn = shift){
 		print STDERR "\t...included from file '$fn'\n";
 	}
+    confess "d'oh";
 	exit 1;
 }
 
+# vim: sw=4 ts=4 expandtab
