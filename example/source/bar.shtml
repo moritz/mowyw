@@ -1,14 +1,14 @@
 <title>Mowyw example: page `bar'</title>
-[[[include head2]]]
+[%include head2%]
 
 <h2>Syntax hilighting</h2>
 
-<p>This page contains some syntax hilighting using the [[[verbatim foo]]]
-[[[syntax perl]]] $perlCode [[[endsyntax]]][[[endverbatim foo]]]
+<p>This page contains some syntax hilighting using the [%verbatim foo%]
+[%syntax perl%] $perlCode [%endsyntax%][%endverbatim foo%]
 construct. Note that not only perl is support, but every language that vim has
 a syntax file for.</p>
 
-<pre>[[[syntax perl]]]
+<pre>[%syntax perl%]
 #!/usr/bin/perl
 # Copyright (C) 2006 by Moritz Andreas Lenz, http://moritz.faui2k3.org/
 # This is free Software. You may use, modify, redistribute... it 
@@ -62,10 +62,10 @@ foreach $edges (10, 11, 13){
 	print OUT $im->png;
 	close OUT;
 }
-[[[endsyntax]]]</pre>
+[%endsyntax%]</pre>
 
 <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed ut dui ac lacus egestas vehicula. Quisque faucibus, risus id consequat porta, orci ligula condimentum mi, ac commodo leo libero eget tortor. Maecenas a ligula in nibh luctus gravida. Praesent vehicula rhoncus tortor. <a href="#">Donec porta rutrum dui.</a> Donec dignissim congue mauris. Sed rhoncus laoreet sem. Nam dui pede, vestibulum convallis, posuere ut, dictum eu, diam. Phasellus nunc. Ut eget ante a ipsum porttitor scelerisque. Quisque auctor elit vitae massa. Vestibulum massa risus, gravida quis, hendrerit sit amet, bibendum sit amet, enim. Fusce nulla. Quisque vulputate metus vitae orci. Pellentesque at arcu. Ut sed neque.</p>
 
 </div>
 
-[[[menu nav bar]]]
+[%menu nav bar%]

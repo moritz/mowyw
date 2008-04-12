@@ -2,10 +2,12 @@ mowyw - mowyw writes your websites (or: Moritz writes your websites ;-)
 
 For license of this file see the notice at the end of the file
 
-moc is an offline CMS, that means it process sources files and generates
+mowyw is an offline CMS, that means it process sources files and generates
 output files from them, usually HTML files, but php files and others are
 possible as well (with some limitations though).
 
+For a formal and more complete description see the manpage at
+<http://perlgeek.de/software/mowyw.1>
 
 SHORT HOWTO:
 -----------
@@ -40,7 +42,7 @@ For example `inlcudes/header' may contain
 <link rel="stylesheet" type="text/css" media="screen, projection" href="style.css" />
 <link rel="stylesheet" type="text/css" media="print" href="print.css" />
 
-and `inlcudes/footer' may contain
+and `includes/footer' may contain
 
 	</body>
 </html>
@@ -63,7 +65,7 @@ mowyw:
 	--source-prefix=src/
 	--destination-prefix=out/
 	--menu-prefix=incl/menu/
-Note that if you whant the prefixes to be directories you have to include the
+Note that if you want the prefixes to be directories you have to include the
 trailing slash (or whatever the directory separator on your OS is).
 
 If you didn't change any heaer/footer/included files you can save processing
@@ -91,6 +93,10 @@ processor or <!-- #include virtual="includes/foo"--> with Server Side Includes
 (SSI).
 
 Note that everywhere the [[[ ... ]]] delimiters can be exchanged by [% .. %].
+
+If the file includes/global exisits, it is processed before each source file.
+Its output is discarded, but options and variables defined in that file are
+available in all source files.
 
 MENUS:
 

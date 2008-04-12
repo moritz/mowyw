@@ -1,3 +1,17 @@
+mowyw (0.5.0)
+	* mowyw: Moved nearly all functionally to a module to allow better testing
+	* mowyw.1.txt: structured documentation in the asciidoc format
+	* t/: many more new test files
+	* lib/Mowyw.pm: added [% ifvar %] tag
+	* lib/Mowyw.pm: added [% bind %] and [% for %] tags
+	* lib/Mowyw/Datasource.pm: Added generic datasource interface
+	* lib/Mowyw/Datasource/DBI.pm: DBI based SQL backend
+	* lib/Mowyw/Datasource/XML.pm: XML::Simple based XML backend
+	* Build.PL: install helper script
+mowyw (0.4.1)
+	* mowyw: Added support for a global include file (includes/global)
+	* mowyw: Reads config file, and modifies include filenames according to
+	that
 mowyw (0.4.0)
 	* mowyw: Added support for new delimiters: [% ... %] instead of [[[
 	  ... ]]]. Currently they are interchangable, so [% .. ]]] works, but

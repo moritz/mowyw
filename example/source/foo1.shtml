@@ -1,5 +1,5 @@
 <title>Mowyw example: page foo1</title>
-[[[include head2]]]
+[%include head2%]
 
 <h2>foo1 is a sub item of foo</h2>
 
@@ -7,4 +7,4 @@
 
 </div>
 
-[[[menu nav foo foo1]]]
+[%menu nav foo foo1%]
