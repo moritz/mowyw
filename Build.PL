@@ -6,11 +6,11 @@ require 5.008000;
 my $build = Module::Build->new(
     create_readme      => 0,
     create_makefile_pl => 'traditional',
-    license            => 'GPL',
+    license            => 'gpl',
     module_name        => 'mowyw',
     dist_author        => 'Moritz Lenz',
     dist_abstract      => 'Macro processor for creating static HTML pages',
-    dist_version       => '0.0.1',
+    dist_version       => '0.5.0',
     requires => {
         'perl'              => '5.8.0',
         'Carp'              => 0,
