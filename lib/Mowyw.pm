@@ -513,12 +513,14 @@ sub do_hilight {
     } else {
         print STDERR "." unless $Quiet;
         # any encoding will do if vim automatically detects it
+        my $vim_encoding = 'utf-16be';
+        my $BOM = "\x{feff}";
         my $syn = Text::VimColor->new(
                 filetype    => $lang,
-                string      => encode('utf-8', "\x{feff}" . $str),
+                string      => encode($vim_encoding, $BOM . $str),
                 );
-        $str = decode('utf-8', $syn->html);
-        $str =~ s/^\x{feff}//;
+        $str = decode($vim_encoding, $syn->html);
+        $str =~ s/^$BOM//;
         return $str;
     }
 }
