@@ -515,9 +515,11 @@ sub do_hilight {
         # any encoding will do if vim automatically detects it
         my $syn = Text::VimColor->new(
                 filetype    => $lang,
-                string      => encode('utf-8', $str),
+                string      => encode('utf-8', "\x{feff}" . $str),
                 );
-        return decode('utf-8', $syn->html);
+        $str = decode('utf-8', $syn->html);
+        $str =~ s/^\x{feff}//;
+        return $str;
     }
 }
 

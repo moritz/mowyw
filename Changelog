@@ -1,3 +1,6 @@
+mowyw (0.5.1)
+	* mowyw: make mowyw encoding aware, added --encoding option. Default is
+	  utf-8
 mowyw (0.5.0)
 	* mowyw: Moved nearly all functionally to a module to allow better testing
 	* mowyw.1.txt: structured documentation in the asciidoc format
