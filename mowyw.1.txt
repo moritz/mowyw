@@ -53,6 +53,9 @@ COMMAND LINE OPTIONS
  * `--source-prefix`
    Change the search path for source files. Defaults to `source/'. Must be a
    directory.
+ * `--encoding`
+   Interpret all input files to have that encoding. Defaults to UTF-8.
+   (Conjecture: should default to the current locale... what to do?).
 
 
 PROCESSING ORDER

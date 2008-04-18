@@ -36,6 +36,7 @@ my $result = GetOptions(
         "menu-prefix=s"         => \$Mowyw::config{default}{menu},
         "destination-prefix=s"  => \$Mowyw::config{default}{online},
         "source-prefix=s"       => \$Mowyw::config{default}{source},
+        "encoding=s"            => \$Mowyw::config{encoding},
     );
 
 $Mowyw::config{per_fn} = get_config();

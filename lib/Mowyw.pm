@@ -11,6 +11,7 @@ use Carp;
 use Storable qw(dclone);
 use Scalar::Util qw(reftype blessed);
 use File::Copy;
+use Encode qw(encode decode);
 
 use Exporter qw(import);
 #use Data::Dumper;
@@ -32,6 +33,7 @@ our %config = (
             online  => 'online/',
             postfix => '',
         },
+        encoding    => 'utf-8',
 );
 $config{default}{menu} = $config{default}{include} . 'menu-';
 
@@ -510,11 +512,12 @@ sub do_hilight {
         return encode_entities($str);
     } else {
         print STDERR "." unless $Quiet;
+        # any encoding will do if vim automatically detects it
         my $syn = Text::VimColor->new(
                 filetype    => $lang,
-                string      => $str,
+                string      => encode('utf-8', $str),
                 );
-        return $syn->html;
+        return decode('utf-8', $syn->html);
     }
 }
 
@@ -621,7 +624,8 @@ sub parse_tokens {
 
 sub parse_file {
     my ($fn, $meta) = @_;
-    open (my $fh, '<', $fn) or die "Can't open file '$fn' for reading: $!";
+    open (my $fh, "<:encoding($config{encoding})", $fn) 
+        or die "Can't open file '$fn' for reading: $!";
     my $str = do { local $/; <$fh> };
     parse_str($str, $meta);
 }
@@ -691,6 +695,7 @@ sub process_file {
             $footer = parse_file($footer_fn, $metadata);
         }
         my ($tmp_fh, $tmp_name) = tempfile();
+        binmode $tmp_fh, ":encoding($config{encoding})";
         print $tmp_fh $header, $str, $footer;
         close $tmp_fh;
         if (compare($new_fn, $tmp_name) == 0){
