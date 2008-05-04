@@ -327,7 +327,7 @@ sub resolve_var {
         my @parts = split m/\./, $name;
         my $var = $meta->{VARS};
         for (@parts){
-            if (!defined $var || reftype($var) ne 'HASH'){
+            if (!defined $var || !ref $var || reftype($var) ne 'HASH'){
                 unless ($meta->{NO_VAR_WARN}){
                     warn "\nCan't dereference '$name' at level '$_': not defined or not a hash\n";
                 }
@@ -513,7 +513,7 @@ sub do_hilight {
     } else {
         print STDERR "." unless $Quiet;
         # any encoding will do if vim automatically detects it
-        my $vim_encoding = 'utf-16be';
+        my $vim_encoding = 'utf-8';
         my $BOM = "\x{feff}";
         my $syn = Text::VimColor->new(
                 filetype    => $lang,

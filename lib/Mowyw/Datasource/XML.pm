@@ -15,6 +15,10 @@ sub new {
     my $file = $opts->{file} or confess "Mandatory option 'file' is missing\n";
     $self->_read_data($file);
 
+    if (exists $opts->{limit}){
+        $self->{remaining} = $opts->{limit};
+    }
+
     return $self;
 }
 
@@ -46,11 +50,13 @@ sub _read_data {
 
 sub is_exhausted {
     my $self = shift;
+    return 1 if (exists $self->{remaining} && $self->{remaining} == 0);
     return scalar(@{$self->{DATA}}) <= $self->{INDEX}
 }
 
 sub get {
     my $self = shift;
+    $self->{remaining}-- if exists $self->{remaining};
     return $self->{DATA}[$self->{INDEX}];
 }
 

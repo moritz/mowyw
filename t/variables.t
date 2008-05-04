@@ -1,4 +1,4 @@
-use Test::More tests => 7;
+use Test::More tests => 8;
 use strict;
 use warnings;
 
@@ -32,6 +32,11 @@ is parse_str('[% readvar foo.bar %]', \%meta),
         'baz',
         'variable access to nested hashes';
 
+$meta{NO_VAR_WARN} = 1;
+
+is parse_str('[% readvar foo.bar.baz %]', \%meta),
+        '',
+        q{Don't die while accessing non-hash};
 
 
 #eval {

@@ -8,7 +8,7 @@ BEGIN {
     if ($@){
         plan skip_all => 'XML::Simple not available';
     } else {
-        plan tests => 19;
+        plan tests => 22;
     }
 }
 
@@ -69,3 +69,22 @@ eval {
 };
 
 ok $@,                          'Dies with ambigous root element';
+
+# test limits
+$x = eval {
+    Mowyw::Datasource->new({
+            type    => 'XML',
+            file    => 't/sample.xml',
+            limit   => 2,
+    });
+};
+
+print $@ if $@;
+
+ok(!$x->is_exhausted,   'First item available with limit 2');
+$x->get();
+ok(!$x->is_exhausted,   'Second item available with limit 2');
+$x->get();
+ok($x->is_exhausted,    'Third item NOT available with limit 2');
+
+

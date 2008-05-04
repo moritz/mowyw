@@ -155,6 +155,18 @@ It's best to take a look at the examples in the distribution, which should
 nicely illustrate the menu mechanism.
 
 
+[[syntax_hilight]]
+SYNTAX HILIGHTING
+-----------------
+Syntax hilighting requires http://www.vim.org/[vim] and
+http://search.cpan.org/perldoc?Text::VimColor[Text::VimColor] to be installed
+(otherwise the code is just HTML escaped, not hilighted).
+
+Since you can't tell vim which encoding a source file is in,
+non-ASCII-characters might not survive the round trip to vim if the locales
+don't fit. On my systems UTF-8 locales worked, everything else didn't. So use
+with caution.
+
 [[options]]
 OPTIONS
 -------
@@ -198,8 +210,10 @@ Now you can access the contents of this XML file in your source files:
 
 Data sources are handled via plugins. Currently XML and DBI are supported.
 
-The XML source is explained by the example above (it doesn't have any more
-options). It is quite limited in that the file structure always has be the
+The XML source is explained by the example above. The only additional option
+is 'limit', which can be set to a positive number and which limits the number
+of iterations. This plugin is quite limited in that the file structure always
+has be the
 same: one root tag that contains a list of secondary tags, each of which many
 only contain distinct tags. Nested tags might work, but aren't officially
 supported.
