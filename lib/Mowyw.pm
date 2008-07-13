@@ -1,6 +1,7 @@
 package Mowyw;
 use strict;
 use warnings;
+#use warnings FATAL => 'all';
 
 use Mowyw::Lexer qw(lex);
 use Mowyw::Datasource;
@@ -14,7 +15,9 @@ use File::Copy;
 use Encode qw(encode decode);
 
 use Exporter qw(import);
-#use Data::Dumper;
+use Data::Dumper;
+use Carp qw(confess);
+binmode STDOUT, ':encoding(UTF-8)';
 
 our @EXPORT_OK = qw(
         get_config
@@ -173,7 +176,10 @@ sub p_menu {
     my @words = split /\s+/, $key;
     p_expect($tokens, "TAG_END", $meta);
     my $menu_fn = shift @words;
+#    print "\nMenu: '$menu_fn'\n";
     $menu_fn = get_include_filename('menu', $menu_fn, $meta->{FILES}->[-1]);
+#    print "Menu after frobbing: '$menu_fn'\n";
+
     my $m = my_dclone($meta);
     push @{$m->{ITEMS}}, @words;
     unshift @{$m->{FILES}}, $menu_fn;
@@ -628,9 +634,12 @@ sub parse_tokens {
 
 sub parse_file {
     my ($fn, $meta) = @_;
+#    print Dumper \%config;
+#    print "\n$config{encoding}\n";
     open (my $fh, "<:encoding($config{encoding})", $fn) 
-        or die "Can't open file '$fn' for reading: $!";
+        or confess "Can't open file '$fn' for reading: $!";
     my $str = do { local $/; <$fh> };
+#    print $str;
     parse_str($str, $meta);
 }
 
@@ -780,8 +789,10 @@ sub transform_conf_hash {
 sub get_include_filename {
     my ($type, $base_fn, $source_fn) = @_;
     confess "Usage: get_include_filename(\$type, \$base, \$source)" unless $source_fn;
+#    print "Passed options ('$type', '$base_fn', '$source_fn')\n";
     # $type should be one of qw(include menu online)
     my $re;
+#    print Dumper $config{per_fn};
     for (keys %{$config{per_fn}}){
         if ($source_fn =~ m/$_/){
             $re = $_;

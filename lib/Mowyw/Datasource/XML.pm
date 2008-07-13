@@ -2,7 +2,7 @@ package Mowyw::Datasource::XML;
 
 use strict;
 use warnings;
-use base 'Mowyw::Datasource';
+use base 'Mowyw::Datasource::Array';
 use XML::Simple;
 use Scalar::Util qw(reftype);
 
@@ -13,11 +13,9 @@ sub new {
     my $self = bless { OPTIONS => $opts, INDEX => 0 }, $class;
 
     my $file = $opts->{file} or confess "Mandatory option 'file' is missing\n";
-    $self->_read_data($file);
-
-    if (exists $opts->{limit}){
-        $self->{remaining} = $opts->{limit};
-    }
+    $opts->{source} = $self->_read_data($file);
+#    print Dumper $opts;
+    $self = $self->SUPER::new($opts);
 
     return $self;
 }
@@ -31,41 +29,21 @@ sub _read_data {
         $data = XMLin($file);
     }
     if (reftype $data eq 'ARRAY'){
-        $self->{DATA} = $data;
+        return $data;
     } else {
         if (exists $self->{OPTIONS}{root}){
-            $self->{DATA} = $data->{$self->{OPTIONS}{root}};
+            return $data->{$self->{OPTIONS}{root}};
         } else {
             my @keys = keys %$data;
             if (@keys > 1){
                 confess "More than one root item, and no 'root' option specified";
             } elsif (@keys == 0){
-                $self->{DATA} = [];
+                return [];
             } else {
-                $self->{DATA} = $data->{$keys[0]};
+                return $data->{$keys[0]};
             }
         }
     }
-}
-
-sub is_exhausted {
-    my $self = shift;
-    return 1 if (exists $self->{remaining} && $self->{remaining} == 0);
-    return scalar(@{$self->{DATA}}) <= $self->{INDEX}
-}
-
-sub get {
-    my $self = shift;
-    $self->{remaining}-- if exists $self->{remaining};
-    return $self->{DATA}[$self->{INDEX}];
-}
-
-sub next {
-    shift->{INDEX}++;
-}
-
-sub reset {
-    shift->{INDEX} = 0;
 }
 
 1;

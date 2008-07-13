@@ -7,6 +7,7 @@ BEGIN {
     eval 'use XML::Simple';
     if ($@){
         plan skip_all => 'XML::Simple not available';
+        exit;
     } else {
         plan tests => 22;
     }
