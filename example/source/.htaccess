@@ -2,6 +2,7 @@ Options  +FollowSymLinks +Includes
 
 AddType 'text/html; charset=ISO-8859-1' shtml
 AddOutputFilter INCLUDES .shtml
+AddHandler cgi-script .cgi
 
 DirectoryIndex index.shtml
 

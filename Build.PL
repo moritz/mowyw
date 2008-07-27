@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Module::Build;
-require 5.008000;
+require 5.008001;
 
 my $build = Module::Build->new(
     create_readme      => 0,
@@ -10,9 +10,9 @@ my $build = Module::Build->new(
     module_name        => 'mowyw',
     dist_author        => 'Moritz Lenz',
     dist_abstract      => 'Macro processor for creating static HTML pages',
-    dist_version       => '0.5.1_1',
+    dist_version_from  => 'lib/Mowyw.pm',
     requires => {
-        'perl'              => '5.8.0',
+        'perl'              => '5.8.1',
         'Carp'              => 0,
         'Data::Dumper'      => 0,
         'Scalar::Util'      => 0,
@@ -20,6 +20,7 @@ my $build = Module::Build->new(
         'File::Compare'     => 0,
         'Storable'          => 0,
         'Exporter'          => 0,
+        'Config::File'      => 0,
     },
     recommends         => {
         'DBI'               => 0,

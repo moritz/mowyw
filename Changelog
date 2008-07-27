@@ -1,3 +1,7 @@
+mowyw (0.5.2)
+	* lib/Mowyw.pm: configurable filter for which files to process
+	* lib/Mowyw/Datasource/Result.pm: First shot at a more general result set
+	  framework. Not yet used by the rest of the program.
 mowyw (0.5.1)
 	* mowyw: make mowyw encoding aware, added --encoding option. Default is
 	  utf-8

@@ -3,6 +3,8 @@ use strict;
 use warnings;
 #use warnings FATAL => 'all';
 
+our $VERSION = '0.5.2';
+
 use Mowyw::Lexer qw(lex);
 use Mowyw::Datasource;
 
@@ -13,6 +15,7 @@ use Storable qw(dclone);
 use Scalar::Util qw(reftype blessed);
 use File::Copy;
 use Encode qw(encode decode);
+use Config::File qw(read_config_file);
 
 use Exporter qw(import);
 use Data::Dumper;
@@ -37,6 +40,9 @@ our %config = (
             postfix => '',
         },
         encoding    => 'utf-8',
+        file_filter => [
+            [1, 10, qr{\..?htm}],
+        ],
 );
 $config{default}{menu} = $config{default}{include} . 'menu-';
 
@@ -675,12 +681,27 @@ sub get_meta_data {
     return $meta;
 }
 
+
 sub process_file {
     my ($fn, $config) = @_;
 
     my $new_fn = get_online_fn($fn);
 
-    if ($fn =~ m#\..?htm# && $fn !~ m#\.swp$#){
+    # process file at all?
+    my $process = 0;
+#    use Data::Dumper;
+#    print Dumper $Mowyw::config{file_filter};
+    for my $f(@{$Mowyw::config{file_filter}}){
+        my ($include, undef, $re) = @$f;
+        if ($fn =~ m/$re/){
+            $process = $include;
+            last;
+        }
+    }
+
+#    print +($process ? '' : 'not '), "processing file $fn\n";
+
+    if ($process){
 
         if ($config{make_behaviour} and  -e $new_fn and (stat($fn))[9] < (stat($new_fn))[9]){
             return;
@@ -752,17 +773,9 @@ sub get_online_fn {
 sub get_config {
     my $cfg_file = 'mowyw.conf';
     if (-e $cfg_file) {
-        eval {
-            require Config::File;
-            Config::File->import qw(read_config_file);
-        };
-        if ($@){
-            warn "Can't read config file because Config::File is not available\n";
-            return {};
-        } else {
-            my $conf_hash = read_config_file($cfg_file); 
-            return transform_conf_hash($conf_hash);
-        }
+        my $conf_hash = read_config_file($cfg_file); 
+#       print Dumper $conf_hash;
+        return transform_conf_hash($conf_hash);
     } else {
         print "No config file '$cfg_file'\n";
         return {};
@@ -781,8 +794,25 @@ sub transform_conf_hash {
                 defined $h->{ uc $feat }{$_} ?  $h->{ uc $feat }{$_} : $d{$feat};
         }
     }
-#    print Dumper \%nh;
-    return \%nh;
+    my @filter;
+    {
+        my %inc = %{$h->{INCLUDE}};
+        %inc = ( 50 => '\..?htm') unless keys %inc;
+        my %exc = %{$h->{EXCLUDE} || {}};
+        while (my ($k, $v) = each %inc){
+            $k =~ tr/0-9//cd;
+            my $re = eval { qr{$v} } || die "Invalid regex '$v' in config: $@";
+            push @filter, [1, $k, $re];
+        }
+        while (my ($k, $v) = each %exc){
+            $k =~ tr/0-9//cd;
+            my $re = eval { qr{$v} } || die "Invalid regex '$v' in config: $@";
+            push @filter, [0, $k, $re];
+        }
+        @filter = reverse sort { $a->[1] <=> $b->[1] } @filter;
+    }
+#    print Dumper \%nh, \@filter;
+    return (\%nh, \@filter);
 }
 
 

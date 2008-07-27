@@ -252,7 +252,8 @@ CONFIGURATION FILE
 ------------------
 [[config]]
 Mowyw tries to read a file called `mowyw.conf`. Within that file you can
-configure pathes and file names on a per-file base.
+configure include pathes and file names on a per-file base, and you can
+specify which files should be processed.
 
 An example config file might look like this:
 
@@ -261,7 +262,11 @@ An example config file might look like this:
     MATCH[english]   = \.en
     POSTFIX[english] = .en
 
-This defines two sections called "german" and "english". If a file matches the
+    INCLUDE[10]      = \.xhtml$
+    EXCLUDE[50]      = _private
+
+The first part defines two sections called "german" and "english". 
+If a file matches the
 regular expression `\.de`, it is treated as being in section "german". All
 include files will have the postfix '.de', which means that if a file is
 called `source/index.html.de`, the header file will be `includes/header.de`, a
@@ -269,7 +274,26 @@ menu `foo` will be searched for in file `includes/menu-foo.de` etc.
 
 This configuration mechanism is primarily intented for creating mutilingual
 sites, but might be useful for other things as well.
- 
+
+The second part consists of `INCLUDE` and `EXCLUDE` statements with their
+priority and the regex they match. Higher priority rules are tested first.
+When a rule matches the file is either processed (in the case of an `INCLUDE`
+option) or just verbatimly copied (in case of an `EXCLUDE` option). 
+
+Due to an limition of the module that reads the config file
+(http://search.cpan.org?Config::File[Config::File]) the
+only way to specify rules with the same priority is to prefix them with
+distinct strings:
+
+    INCLUDE[a5] = foo
+    INCLUDE[b5] = bar
+
+is equivalent to
+    
+    INCLUDE[5]  = foo|bar
+
+Don't give `INCLUDE` and `EXCLUDE`-options with the same priority, the
+behaviour in that case is undefined.
 
 RESOURCES
 ---------
@@ -297,19 +321,15 @@ were accepted as a tradeoff for simplicity.
    efficient. Additionally it slurps the files into memory before parsing,
    which isn't terribly efficient either. But it's simple, and if it's not
    enough for you, go get a bigger machine.
- * All input files are assumed to be encoded in UTF-8. This might become
-   configurable one day.
  * There are some limitations due to multi-pass parsing. For example you can't
    include the string `%]` in SQL statements, because it is considered to be a
    tag closer by the lexer. A future rewrite might change that.
- * Mowyw isn't very well tested, because in its current structure it's not
-   very easy to test. This has to be changed, and it will.
 
 
 AUTHOR
 ------
 
-Written by Moritz Lenz mailto:moritz@faui2k3.org[].
+Written by http://perlgeek.de/[Moritz Lenz], mailto:moritz@faui2k3.org[].
 
 COPYRIGHT 
 ---------
@@ -319,6 +339,8 @@ Copyright 2006 - 2008 by Moritz Lenz.
 This is free software.  You may redistribute copies  of  it  under  the terms
 of the  http://www.gnu.org/licenses/gpl.html[GNU General Public License],
 Version 2.1 or 3 (choose the one you prefer).  
+
+(If this license is not permissive enough for you, please contact the author).
 
 There is NO WARRANTY, to the extent permitted by law.
 

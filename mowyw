@@ -25,6 +25,7 @@ use warnings;
 use strict;
 use FindBin;
 use lib "$FindBin::Bin/lib";
+require 5.008001;
 use Mowyw qw(get_config process_file process_dir parse_all_in_dir);
 
 use Getopt::Long;
@@ -39,7 +40,9 @@ my $result = GetOptions(
         "encoding=s"            => \$Mowyw::config{encoding},
     );
 
-$Mowyw::config{per_fn} = get_config();
+($Mowyw::config{per_fn}, $Mowyw::config{file_filter}) = get_config();
+#use Data::Dumper;
+#print Dumper $Mowyw::config{file_filter};
 
 parse_all_in_dir($Mowyw::config{default}{source});
 __END__
