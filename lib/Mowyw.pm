@@ -728,7 +728,7 @@ sub process_file {
             unshift @{$m->{FILES}}, $footer_fn;
             $footer = parse_file($footer_fn, $metadata);
         }
-        my ($tmp_fh, $tmp_name) = tempfile();
+        my ($tmp_fh, $tmp_name) = tempfile( UNLINK => 1);
         binmode $tmp_fh, ":encoding($config{encoding})";
         print $tmp_fh $header, $str, $footer;
         close $tmp_fh;
