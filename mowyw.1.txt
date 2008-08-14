@@ -57,6 +57,8 @@ COMMAND LINE OPTIONS
    Interpret all input files to have that encoding. Defaults to UTF-8.
    (Conjecture: should default to the current locale... what to do?).
 
+All options except `--make` can be specified in a config file, with more
+customization options.
 
 PROCESSING ORDER
 ----------------
@@ -112,7 +114,9 @@ The following block elements are supported:
    `[% verbatim foo %] Some [% non-processed %] markup [% endverbatim foo %]`
  * `syntax` uses vim(1) to do syntax hilighting. Expects the name of the
    language or configuration as its only argument. Example: `<pre>[%syntax
-   perl%]print "Hello, world\n";[%endsyntax%]</pre>`.
+   perl%]print "Hello, world\n";[%endsyntax%]</pre>`. The pseudo-syntax
+   `escape` HTML-escapes the string and doesn't to any other syntax
+   hilighting.
  * `for` iterates of a datasource. See section <<datasource,DATA SOURCES>> 
    below.
  * `ifvar` executes the block only if the variable is defined.
@@ -124,23 +128,19 @@ MENUES
 mowyw has special menu support. To define a menu named `foo`, create a file
 `source/menu-foo` with the following contents:
 
-    <h2>Your menu title</h2>
-    <ul>
-        [% item home  <li><a {{class="active"}} 
-            href="/">Home</a></li> %]
-        [% item first <li><a {{class="active"}} 
-            href="/first">First</a></li> %]
-        [% item sec <li><a {{class="active"}} 
-            href="/sec/">First</a> 
-            {{
-                 [% comment this is a sub menu that will only be visible
-                     inside the `sec' menu %]
-                 [% item subitem1 <p>More menu markup</p> %]
-                 [% item subitem2 <p>Even more menu markup</p> %]
-            }}
-        </li>
-        %]
-     </ul>
+   <h2>Your menu title</h2>
+   <ul>
+       [% item home  <li><a {{class="active"}} href="/">Home</a></li>       %]
+       [% item first <li><a {{class="active"}} href="/first">First</a></li> %]
+       [% item sec   <li><a {{class="active"}} href="/sec/">First</a> 
+           {{
+                [% comment this is a sub menu that will only be visible
+                    inside the `sec' menu                     %]
+                [% item subitem1 <p>More menu markup</p>      %]
+                [% item subitem2 <p>Even more menu markup</p> %]
+           }}
+       </li>   %]
+   </ul>
 
 Now in your index page you can include that menu with the directive 
 `[% menu home %]`. This will produce the menu contents with the markup

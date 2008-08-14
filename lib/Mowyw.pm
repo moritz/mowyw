@@ -513,6 +513,9 @@ sub p_syntax {
 
 sub do_hilight {
     my ($str, $lang, $meta) = @_;
+    if ($lang eq 'escape'){
+        return encode_entities($str);
+    }
     eval { 
         no warnings "all";
         require Text::VimColor; 
