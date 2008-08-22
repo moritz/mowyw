@@ -132,18 +132,18 @@ like this:
 <div class="menu">
 Navigation:
 <ul>
-	[[[item foo <li><a href="foo.html" {{class="#active"}}>foo</a> 
+	[% item foo <li><a href="foo.html" {{class="#active"}}>foo</a> 
 		{{<ul>
 			<li><a href="foo1">foo1</a></li>
 			<li><a href="foo2">foo2</a></li>
-		</ul>}}</li>]]]
-	[[[item bar <li><a href="bar.html" {{class="#active"}}>bar</a></li>]]]
-	[[[item baz <li><a href="baz.html" {{class="#active"}}>baz</a></li>]]]
+		</ul>}}</li> %]
+	[% item bar <li><a href="bar.html" {{class="#active"}}>bar</a></li> %]
+	[% item baz <li><a href="baz.html" {{class="#active"}}>baz</a></li> %]
 </ul>
 </div>
 
 now in your file foo.html, you use the line
-[[[menu navigation foo]]].
+[% menu navigation foo %].
 This line will be replaced by mowyw with:
 
 <div class="menu">
@@ -159,10 +159,10 @@ Navigation:
 </ul>
 </div>
 
-Each menu item looks like this: [[[item label1 some_text]]]. If it is called as
-[[[menu label1]]] it will produce some_text, and all double curly brackets {{ }}
+Each menu item looks like this: [% item label1 some_text %]. If it is called as
+[% menu label1 %] it will produce some_text, and all double curly brackets {{ }}
 are simply stripped, but the text between them remains.
-If it is called with a different name, say [[[menu label2]]], the curly brackets
+If it is called with a different name, say [% menu label2 %] the curly brackets
 and the text between them are stripped.
 
 SYNTAX HILIGHTING
@@ -170,13 +170,13 @@ SYNTAX HILIGHTING
 If you have both the Perl module Text::VimColor and Vim installed, you can use
 the follwing construct to automagically generate syntax hilighted HTML markup:
 
-<pre>[[[syntax perl]]]
+<pre>[% syntax perl %]
 #!/usr/bin/perl
 
 sub blubb {
 	print "This sub only prints this stupid message\n";
 }
-[[[endsyntax]]]</pre>
+[% endsyntax %]pre>
 
 If you don't have Text::VimColor installed, the characters '&', '<' and '>'
 will still be automatically escaped.
@@ -201,16 +201,16 @@ The standard CSS classes are:
 
 VERBATIM OUTPUT
 
-If your website includes string like [[[ or ]]] etc., you can use the
+If your website includes string like [% or %] etc., you can use the
 verbatim-construct to prevent it from parsing:
 
-[[[verbatim foobarbaz]]]
+[% verbatim foobarbaz %]
 Things here inbetween will be printed out exactly as they stand here, you can
 safely write things like 
 "in perl6 [...] returns array refs:
 my $a = [2, [4, 5, [8, 9,10]]];"
 note that the ']]]' will not cause any harm.
-[[[endverbatim foobarbaz]]]
+[% endverbatim foobarbaz %]
 
 the name in the verbatim and in the endverbatim-package have to agree exactly
 and my consist of alphabetic characters and numbers.
@@ -219,17 +219,17 @@ COMMENTS
 
 You can exclude parts entirly from showing up in the output by putting them
 inside a comment:
-[[[comment anything inside here will not show up in the output]]]
+[% comment anything inside here will not show up in the output %]
 In a comment everything but ']]]' is allowed.
 
 
 OMITTING HEADER AND FOOTER
 
 If you include a line like this:
-[[[option no-header]]]
+[% option no-header %]
 the header is _not_ prepended as usual.
 You can achieve the following functionality for the footer with the line
-[[[option no-footer]]]
+[% option no-footer %]
 
 
 SETTING AND READING VARIABLES
@@ -239,11 +239,11 @@ your HTML header to be in one specific place.
 A way to achive this is with the setvar and readvar constructs. Place this in
 your header file:
 <html>
-	<head><title>[[[readvar title]]]</title>/head>
+	<head><title>[% readvar title %]</title>/head>
 	<body>
 (of course you should use a doctype ;-)
 And then in each source file you can use
-[[[setvar title This is the title of this stupid page]]]
+[% setvar title This is the title of this stupid page %]
 to set the title. If you forget to set a variable before using it  a warning
 will be emitted.
 
@@ -253,13 +253,13 @@ include, menu, item or automatically by including the header and footer) the
 variables from the higher level scope are still available, but if you modify
 them in local scope they will still be unmodified in the outer scope.
 Example:
-	[[[setvar foo bar]]]
-	[[[include somefile]]]
-	[[[redavar foo]]] 	--- gives bar
+	[% setvar foo bar %]
+	[% include somefile %]
+	[% redavar foo %] 	--- gives bar
 In file somfile:
-	[[[readvar foo]]] 	--- gives bar
-	[[[setvar foo baz]]]	
-	[[[readvar foo]]]	--- gives baz
+	[% readvar foo %] 	--- gives bar
+	[% setvar foo baz %]	
+	[% readvar foo %]	--- gives baz
 Therefore you can change the header's and footer's output by defining
 variables in the main source file, but not the other way round.
 
@@ -275,12 +275,8 @@ are part of a typical CDATA declaration in xml files (and xhtml) like this:
 /*]]>*/
 </style>
 
-Now tripple square brackets (like [[[include foo]]]) are used.
-
-
-LIMITATIONS & BUGS
- * Currently mowyw is not very flexible in many ways, for example files
-   outside the `include/' directory can't be included.
+Now tripple square brackets (like [[[ include foo]]] ) or, preferred, 
+[% ... %] are used.
 
 
 LICENSE:
