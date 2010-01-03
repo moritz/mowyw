@@ -15,6 +15,7 @@ my @tokens = (
 my $text = "12 + foo (3 * (4 + -1))BAR";
 my @pt = lex($text, \@tokens);
 foreach (@pt){
-	my ($name, $text) = @$_;
-	print "Found Token $name: $text\n";
+	my ($name, $matched, $pos) = @$_;
+	print "Found Token $name: $matched ($pos)\n";
+    print substr($text, $pos, length($matched)), "\n";
 }

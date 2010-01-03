@@ -58,58 +58,60 @@ our %EXPORT_TAGS = (":all" => \@EXPORT);
 
 sub lex {
 	my ($text, $tokens) = @_;
-	return () unless (length $text);
+	return () unless length $text;
 	my @res;
-	while (length($text) > 0){
+    pos($text) = 0;
+	while (pos($text) < length($text)){
 		my $matched = 0;
 		# try to match at the start of $text
 		foreach (@$tokens){
 			my $re = $_->[1];
-			if ($text =~ m#^$re#s){
+			if ($text =~ m#\G($re)#gc){
 				$matched = 1;
-				my $match = $&;
+				my $match = $1;
 				die "Each token has to require at least one character; Rule $_->[0] matched Zero!\n" unless (length($match) > 0);
 				if (my $fun = $_->[2]){
-					$match = &$fun($match);
+					$match = $fun->($match);
 				}
 				if (defined $match){
-					push @res, [$_->[0], $&];
+					push @res, [$_->[0], $match, pos($text) - length($match)];
 				}
-				$text = $';
 				last;
 			}
 		}
 		unless ($matched){
-			# no token matched, look what the closest token is
-#			my $remain = substr $text, 0, 30;
-#			die "No Token matched the remaining String which starts  as $remain\n";
 			my $next_token;
+            my $next_token_match;
+            my $match;
+
 			my $min = length($text);
+            my $pos = pos($text);
+
+            # find the token that matches first
 			foreach(@$tokens){
+                pos($text) = $pos;
 				my $re = $_->[1];
-				if ($text =~ m#$re#s){
-					if (length($`) < $min){
-						$min = length($`);
-						$next_token = $_;
-						$matched = 1;
+				if ($text =~ m#\G((?s:.)*?)($re)#gc){
+					if ($+[1] < $min){
+						$min              = $+[1];
+						$next_token       = $_;
+                        $next_token_match = $2;
+						$match            = $1;
 					}
 				}
 			}
-			if ($matched){
-				my $re = $next_token->[1];
-				$text =~ m#$re#;
-				push @res, ['UNMATCHED', $`];
-				my $match = $&;
-				die "Each token has to require at least one character; Rule $_->[0] matched Zero!\n" unless (length($match) > 0);
-				if (my $fun =$next_token->[2]){
-					$match = &$fun($match);
+			if (defined $match){
+				push @res, ['UNMATCHED', $match, $pos - length($pos)];
+				die "Each token has to require at least one character; Rule $_->[0] matched Zero!\n"
+                    unless (length($next_token_match) > 0);
+				if (my $fun = $next_token->[2]){
+					$match = $fun->($match);
 				}
-				push @res, [$next_token->[0], $match] if (defined $match);
-				$text = $';
+				push @res, [$next_token->[0], $next_token_match, $min] if defined $match;
+                pos($text) = $min + length($next_token_match);
 			} else {
-				push @res, ['UNMATCHED', $text];
-#				print "END OF FILE IS UNMATCHED: $text\n";
-				$text = "";
+				push @res, ['UNMATCHED', substr($text, $pos), $pos];
+                pos($text) = length($text);
 			}
 		}
 	}
