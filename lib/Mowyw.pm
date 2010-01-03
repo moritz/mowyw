@@ -122,10 +122,10 @@ sub strip_ws {
 
 sub parse_error {
     my $message = shift;
-    my $fn = shift;
-    my $str = "Parse error in file '$fn': $message\n";
-    while ($fn = shift){
-       $str .= "\t...included from file '$fn'\n";
+    my @filenames = @{shift()};
+    my $str = "Parse error in file '$filenames[0]': $message\n";
+    for (@filenames[0..$#filenames]) {
+       $str .= "    ...included from file '$_'\n";
     }
     confess $str;
     exit 1;
@@ -257,7 +257,7 @@ sub p_for {
     my ($iter, $in, $datasource) = split m/\s+/, $contents;
     if (!defined $datasource || lc $in ne 'in' ){
         parse_error(q{Can't parse for statement. Syntax is [% for iterator_var in datasource %] ... [% endfor %]},
-                    @{$meta->{FILES}});
+                    $meta->{FILES});
     }
     my $ds = $meta->{VARS}{$datasource};
     if (!$ds || !blessed($ds)){
@@ -283,7 +283,7 @@ sub p_ifvar {
     my $contents = strip_ws(slurp_upto_token($tokens, 'TAG_END', $meta));
     if ($contents =~ m/\s/){
         parse_error(q{Parse error in 'ifvar' tag. Syntax is [% ifvar variable %] .. [% endifvar %]},
-                    @{$meta->{FILES}});
+                    $meta->{FILES});
     }
     my $c = do {
         local $meta->{NO_VAR_WARN} = 1;
@@ -403,7 +403,7 @@ sub parse_hash {
     if (pos($str) + 1 < length($str)){
         # end of string not reached
         parse_error(qq{Can't parse key-value pairs in $statement_name statement. Syntax is key1:val1 key2:val2 ... },
-                    @{$meta->{FILES}});
+                    $meta->{FILES});
     }
 }
 
@@ -488,7 +488,7 @@ sub p_syntaxfile {
     p_expect($tokens, "TAG_END", $meta);
     my @t = split m/\s+/, $tag_content;
     if (scalar @t != 2){
-        parse_error("Usage of syntaxfile tag: [[[syntaxfile <filename> <language>", @{$meta->{FILES}});
+        parse_error("Usage of syntaxfile tag: [[[syntaxfile <filename> <language>", $meta->{FILES});
     }
 
 }
@@ -544,7 +544,7 @@ sub do_hilight {
 # expectation was not met.
 sub p_expect {
     my ($tokens, $expect, $meta) = splice @_, 0, 3;
-    parse_error("Unexpected End of File, expected $expect", @{$meta->{FILES}}) unless (@$tokens);
+    parse_error("Unexpected End of File, expected $expect", $meta->{FILES}) unless (@$tokens);
     confess("\$tokens not a array ref - this is most likely a programming error\n$internal_error_message") unless(ref($tokens) eq "ARRAY");
     if ($tokens->[0]->[0] eq $expect){
         my $e_val = shift;
@@ -553,10 +553,10 @@ sub p_expect {
             shift @$tokens;
             return $val;
         } else {
-            parse_error("Expected '$e_val', got $tokens->[0][1]\n", @{$meta->{FILES}});
+            parse_error("Expected '$e_val', got $tokens->[0][1]\n", $meta->{FILES});
         }
     }
-    parse_error("Expected token $expect, got $tokens->[0]->[0]\n", @{$meta->{FILES}});
+    parse_error("Expected token $expect, got $tokens->[0]->[0]\n", $meta->{FILES});
 }
 
 
@@ -591,7 +591,7 @@ sub parse_tokens {
                 my ($tag, $prior_tag) = @_;
                 return sub {
                     my ($tokens, $meta) = @_;
-                    parse_error("Unexpected tag '$tag' without prior '$prior_tag'", @{$meta->{FILES}});
+                    parse_error("Unexpected tag '$tag' without prior '$prior_tag'", $meta->{FILES});
                 }
             };
 
