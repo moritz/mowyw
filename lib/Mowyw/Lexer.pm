@@ -27,13 +27,16 @@ Mowyw::Lexer - Simple Lexer
 
 =head1 DESCRIPTION
 
-Mowyw::Lexer is a simple lexer that breaks up a text into tokens, depenending on the input tokens you provide
+Mowyw::Lexer is a simple lexer that breaks up a text into tokens, depenending
+on the input tokens you provide.
 
-The only exported method is lex($$), which expects input text as its first argument and a array ref to list of input tokens.
+The only exported routine is C<lex>, which expects input text as its first
+argument, and a array references as second argument, which contains arrays of
+token names and regexes.
 
 Each input token consists of a token name (which you can choose freely), a regexwhich matches the desired token, and optionally a reference to a functions that takes the matched token text as its argument. The token text is replaced by the return value of that function. If the function returns undef, that token will not be included in the list of output tokens.
 
-lex() returns a list of output tokens, each output token is a reference to a list which contains the token name and the matched text.
+C<lex> returns a list of output tokens, each output token is a reference to a list which contains the token name and the matched text.
 
 If there is unmatched text, it is returned with the token name UNMATCHED.
 
@@ -53,7 +56,7 @@ our @EXPORT = qw(lex);
 
 our %EXPORT_TAGS = (":all" => \@EXPORT);
 
-sub lex($$){
+sub lex {
 	my ($text, $tokens) = @_;
 	return () unless (length $text);
 	my @res;
@@ -112,4 +115,4 @@ sub lex($$){
 	}
 	return @res;
 }
-1;
+-1;
