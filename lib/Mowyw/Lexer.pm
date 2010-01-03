@@ -58,6 +58,16 @@ our %EXPORT_TAGS = (":all" => \@EXPORT);
 
 sub lex {
 	my ($text, $tokens) = @_;
+
+    my ($last_line_number, $last_pos) = (0, 0);
+    my $pos_and_line_number = sub {
+        my $pos = shift;
+        $last_line_number +=
+            (substr($text, $last_pos, $pos - $last_pos) =~ tr/\n//);
+        $last_pos = $pos;
+        return ($pos, $last_line_number + 1);
+    };
+
 	return () unless length $text;
 	my @res;
     pos($text) = 0;
@@ -74,7 +84,10 @@ sub lex {
 					$match = $fun->($match);
 				}
 				if (defined $match){
-					push @res, [$_->[0], $match, pos($text) - length($match)];
+					push @res, [$_->[0],
+                                $match,
+                                $pos_and_line_number->(pos($text) - length($match)),
+                            ];
 				}
 				last;
 			}
@@ -101,16 +114,25 @@ sub lex {
 				}
 			}
 			if (defined $match){
-				push @res, ['UNMATCHED', $match, $pos - length($pos)];
+				push @res, ['UNMATCHED',
+                            $match,
+                            $pos_and_line_number->($pos - length($pos))
+                           ];
 				die "Each token has to require at least one character; Rule $_->[0] matched Zero!\n"
                     unless (length($next_token_match) > 0);
 				if (my $fun = $next_token->[2]){
 					$match = $fun->($match);
 				}
-				push @res, [$next_token->[0], $next_token_match, $min] if defined $match;
+				push @res, [$next_token->[0],
+                            $next_token_match,
+                            $pos_and_line_number->($min),
+                           ] if defined $match;
                 pos($text) = $min + length($next_token_match);
 			} else {
-				push @res, ['UNMATCHED', substr($text, $pos), $pos];
+				push @res, ['UNMATCHED',
+                            substr($text, $pos),
+                            $pos_and_line_number->($pos)
+                           ];
                 pos($text) = length($text);
 			}
 		}
