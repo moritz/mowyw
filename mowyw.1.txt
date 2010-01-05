@@ -311,16 +311,16 @@ mowyw was written to get its author's job done, and it does that well. While
 it was written with generality in mind, there are still some restrictions that
 were accepted as a tradeoff for simplicity.
 
- * Error messages aren't very useful for the uninitiated, and aren't annotated
-   with line numbers. The latter will hopefully be fixed (which should make
-   the former less intrusive).
+ * Error messages aren't very useful for the uninitiated, though the line
+   number makes it pretty obvious where to search for for the error
  * Disk space: mowyw keeps two complete copies of a project on disk, the
    source files and the resulting online files. This might not be optimal, and
    consumes unnecessary space for files that are not processed anyway.
  * Memory: mowyw is written in Perl, which is not know to be terribly memory
    efficient. Additionally it slurps the files into memory before parsing,
    which isn't terribly efficient either. But it's simple, and if it's not
-   enough for you, go get a bigger machine.
+   enough for you, go get a bigger machine (or contribute a stream tokenizer
+    and parser).
  * There are some limitations due to multi-pass parsing. For example you can't
    include the string `%]` in SQL statements, because it is considered to be a
    tag closer by the lexer. A future rewrite might change that.
