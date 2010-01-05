@@ -21,32 +21,43 @@ Mowyw::Lexer - Simple Lexer
 	     );
 	my $text = "-12 * (3+4)";
 	foreach (lex($text, \@input_tokens){
-		my ($name, $text) = @$_;
-		print "Found Token $name: $text\n";
+		my ($name, $text, $position, $line) = @$_;
+		print "Found Token $name: '$text'\n"
+        print "    at position $position line $line\n";
 	}
 
 =head1 DESCRIPTION
 
-Mowyw::Lexer is a simple lexer that breaks up a text into tokens, depenending
-on the input tokens you provide.
+Mowyw::Lexer is a simple lexer that breaks up a text into tokens according to
+regexes you provide.
 
-The only exported routine is C<lex>, which expects input text as its first
+The only exported subroutine is C<lex>, which expects input text as its first
 argument, and a array references as second argument, which contains arrays of
 token names and regexes.
 
-Each input token consists of a token name (which you can choose freely), a regexwhich matches the desired token, and optionally a reference to a functions that takes the matched token text as its argument. The token text is replaced by the return value of that function. If the function returns undef, that token will not be included in the list of output tokens.
+Each input token consists of a token name (which you can choose freely), a
+regexwhich matches the desired token, and optionally a reference to a
+functions that takes the matched token text as its argument. The token text is
+replaced by the return value of that function. If the function returns undef,
+that token will not be included in the list of output tokens.
 
-C<lex> returns a list of output tokens, each output token is a reference to a list which contains the token name and the matched text.
+C<lex> returns a list of output tokens, each output token is a reference to a
+list which contains the token name, matched text, position of the match in the
+input string (zero-based, suitable for passing to C<substr>), and line number
+of the start of the match (one-based, suitable for humans).
 
-If there is unmatched text, it is returned with the token name UNMATCHED.
+If there is unmatched text, it is returned with the token name C<UNMATCHED>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2007 by Moritz Lenz, http://moritz.faui2k3.org, moritz@faui2k3.org
+Copyright (C) 2007,2009 by Moritz Lenz, http://perlgeek.de/, moritz@faui2k3.org
 
-This Program and its Documentation is free software. You may distribute it under the same terms as perl itself.
+This Program and its Documentation is free software. You may distribute it
+under the terms of the Artistic License 2.0 as published by The Perl
+Foundation.
 
-However all code examples are to be public domain, so you can use it in any way you want to.
+However all code examples are public domain, so you can use it in any way you
+want to.
 
 =cut
 
