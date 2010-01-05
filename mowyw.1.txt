@@ -334,11 +334,10 @@ Written by http://perlgeek.de/[Moritz Lenz], mailto:moritz@faui2k3.org[].
 COPYRIGHT 
 ---------
 
-Copyright 2006 - 2008 by Moritz Lenz.
+Copyright 2006 - 2009 by Moritz Lenz.
 
 This is free software.  You may redistribute copies  of  it  under  the terms
-of the  http://www.gnu.org/licenses/gpl.html[GNU General Public License],
-Version 2.1 or 3 (choose the one you prefer).  
+of the Artistic License 2 as published by The Perl Foundation.
 
 (If this license is not permissive enough for you, please contact the author).
 

@@ -1,3 +1,7 @@
+mowyw (0.6.0)
+	* lib/Mowyw/Lexer.pm: Add position and line numbers to parsed tokens
+	* lib/Mowyw.pm: Add line number to error message
+	* *: Changed license to Artistic 2.0
 mowyw (0.5.2)
 	* lib/Mowyw.pm: configurable filter for which files to process
 	* lib/Mowyw/Datasource/Result.pm: First shot at a more general result set
