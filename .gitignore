@@ -1,0 +1,11 @@
+.*.swp
+*~
+*.tar.gz
+*.html
+MANIFEST
+MANIFEST.bak
+META.yml
+Makefile.PL
+Build
+_build
+blib
