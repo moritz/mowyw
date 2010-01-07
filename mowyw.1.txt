@@ -312,7 +312,7 @@ it was written with generality in mind, there are still some restrictions that
 were accepted as a tradeoff for simplicity.
 
  * Error messages aren't very useful for the uninitiated, though the line
-   number makes it pretty obvious where to search for for the error
+   number makes it pretty obvious where to search for for the error.
  * Disk space: mowyw keeps two complete copies of a project on disk, the
    source files and the resulting online files. This might not be optimal, and
    consumes unnecessary space for files that are not processed anyway.

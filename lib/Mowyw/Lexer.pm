@@ -9,22 +9,22 @@ package Mowyw::Lexer;
 Mowyw::Lexer - Simple Lexer
 
 =head1 SYNOPSIS
-	
-	use Mowyw::Lexer qw(lex);
-	# suppose you want to parse simple math expressions
-	my @input_tokens = (
-		['Int',		qr/(?:-|\+)?\d+/],
-		['Op', 		qr/\+|\*|-|\//],
-		['Brace_Open',	qr/\(/],
-		['Brace_Close',	qr/\)/],
-		['Whitespace',	qr/\s/, sub { return undef; }],
-	     );
-	my $text = "-12 * (3+4)";
-	foreach (lex($text, \@input_tokens){
-		my ($name, $text, $position, $line) = @$_;
-		print "Found Token $name: '$text'\n"
+    
+    use Mowyw::Lexer qw(lex);
+    # suppose you want to parse simple math expressions
+    my @input_tokens = (
+        ['Int',     qr/(?:-|\+)?\d+/],
+        ['Op',      qr/\+|\*|-|\//],
+        ['Brace_Open',  qr/\(/],
+        ['Brace_Close', qr/\)/],
+        ['Whitespace',  qr/\s/, sub { return undef; }],
+         );
+    my $text = "-12 * (3+4)";
+    foreach (lex($text, \@input_tokens){
+        my ($name, $text, $position, $line) = @$_;
+        print "Found Token $name: '$text'\n"
         print "    at position $position line $line\n";
-	}
+    }
 
 =head1 DESCRIPTION
 
@@ -68,7 +68,7 @@ our @EXPORT = qw(lex);
 our %EXPORT_TAGS = (":all" => \@EXPORT);
 
 sub lex {
-	my ($text, $tokens) = @_;
+    my ($text, $tokens) = @_;
 
     my ($last_line_number, $last_pos) = (0, 0);
     my $pos_and_line_number = sub {
@@ -79,75 +79,80 @@ sub lex {
         return ($pos, $last_line_number + 1);
     };
 
-	return () unless length $text;
-	my @res;
+    return () unless length $text;
+    my @res;
     pos($text) = 0;
-	while (pos($text) < length($text)){
-		my $matched = 0;
-		# try to match at the start of $text
-		foreach (@$tokens){
-			my $re = $_->[1];
-			if ($text =~ m#\G($re)#gc){
-				$matched = 1;
-				my $match = $1;
-				die "Each token has to require at least one character; Rule $_->[0] matched Zero!\n" unless (length($match) > 0);
-				if (my $fun = $_->[2]){
-					$match = $fun->($match);
-				}
-				if (defined $match){
-					push @res, [$_->[0],
+    while (pos($text) < length($text)){
+        my $matched = 0;
+        # try to match at the start of $text
+        foreach (@$tokens){
+            my $re = $_->[1];
+            if ($text =~ m#\G($re)#gc){
+                $matched = 1;
+                my $match = $1;
+                die "Each token has to require at least one character; Rule $_->[0] matched Zero!\n" unless (length($match) > 0);
+                my $token_pos = pos($text)  - length($match);
+                if (my $fun = $_->[2]){
+                    $match = $fun->($match);
+                }
+                if (defined $match){
+                    push @res, [$_->[0],
                                 $match,
-                                $pos_and_line_number->(pos($text) - length($match)),
+                                $pos_and_line_number->($token_pos),
                             ];
-				}
-				last;
-			}
-		}
-		unless ($matched){
-			my $next_token;
+                }
+                last;
+            }
+        }
+        unless ($matched){
+            my $next_token;
             my $next_token_match;
             my $match;
 
-			my $min = length($text);
+            my $min = length($text);
             my $pos = pos($text);
 
             # find the token that matches first
-			foreach(@$tokens){
-                pos($text) = $pos;
-				my $re = $_->[1];
-				if ($text =~ m#\G((?s:.)*?)($re)#gc){
-					if ($+[1] < $min){
-						$min              = $+[1];
-						$next_token       = $_;
+            my $token_pos;
+            foreach(@$tokens){
+                my $re = $_->[1];
+                if ($text =~ m#\G((?s:.)*?)($re)#gc){
+                    if ($+[1] < $min){
+                        $min              = $+[1];
+                        $next_token       = $_;
                         $next_token_match = $2;
-						$match            = $1;
-					}
-				}
-			}
-			if (defined $match){
-				push @res, ['UNMATCHED',
+                        $match            = $1;
+                        $token_pos        = pos($text) - length($match);
+                    }
+                }
+                pos($text) = $pos;
+            }
+            if (defined $match){
+                push @res, ['UNMATCHED',
                             $match,
-                            $pos_and_line_number->($pos - length($pos))
+                            $pos_and_line_number->($token_pos - length($match)),
                            ];
-				die "Each token has to require at least one character; Rule $_->[0] matched Zero!\n"
+                die "Each token has to require at least one character; Rule $_->[0] matched Zero!\n"
                     unless (length($next_token_match) > 0);
-				if (my $fun = $next_token->[2]){
-					$match = $fun->($match);
-				}
-				push @res, [$next_token->[0],
+                if (my $fun = $next_token->[2]){
+                    $match = $fun->($match);
+                }
+                push @res, [$next_token->[0],
                             $next_token_match,
                             $pos_and_line_number->($min),
                            ] if defined $match;
                 pos($text) = $min + length($next_token_match);
-			} else {
-				push @res, ['UNMATCHED',
+            } else {
+                push @res, ['UNMATCHED',
                             substr($text, $pos),
                             $pos_and_line_number->($pos)
                            ];
                 pos($text) = length($text);
-			}
-		}
-	}
-	return @res;
+            }
+        }
+    }
+    return @res;
 }
 -1;
+
+# vim: sw=4 ts=4 expandtab
