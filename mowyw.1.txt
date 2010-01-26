@@ -11,7 +11,7 @@ SYNOPSIS
 --------
  - *mowyw* 
  - *mowyw* `--make --source-prefix sp --destination-prefix dp --menu-prefix mp
-           --includes-prefix=ip --postifx=.html`
+           --includes-prefix=ip --postifx=.html --quiet`
 
 DESCRIPTION
 -----------
@@ -41,6 +41,8 @@ COMMAND LINE OPTIONS
  * `--make`
    Only process files with a newer timestamp than the corresponding `online/'
    file.
+ * `--quiet`
+   Don't produce diagnostics or progress output
  * `--postfix`
    Append the given postfix to the filename of all included file names (and
    menu files). Defaults to the empty string.

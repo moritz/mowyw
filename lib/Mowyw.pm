@@ -31,7 +31,6 @@ our @EXPORT_OK = qw(
         parse_all_in_dir
 );
 
-our $Quiet = 0;
 our %config = (
         default => {
             include => 'includes/',
@@ -374,7 +373,7 @@ sub resolve_var {
     if (exists $meta->{VARS}->{$name}){
         return $meta->{VARS}->{$name};
     } else {
-        unless ($meta->{NO_VAR_WARN} || $Quiet){
+        unless ($meta->{NO_VAR_WARN} || $config{quiet}){
             print STDERR "Trying to access variable '$name' which is not defined\n";
         }
         return undef;
@@ -548,11 +547,11 @@ sub do_hilight {
     };
     if ($@){
         # require was not successfull 
-        print STDERR " Not syntax hilighting, Text::VimColor not found\n" unless $Quiet;
+        print STDERR " Not syntax hilighting, Text::VimColor not found\n" unless $config{quiet};
         # encode at least some special chars "by hand"
         return encode_entities($str);
     } else {
-        print STDERR "." unless $Quiet;
+        print STDERR "." unless $config{quiet};
         # any encoding will do if vim automatically detects it
         my $vim_encoding = 'utf-8';
         my $BOM = "\x{feff}";
@@ -744,7 +743,7 @@ sub process_file {
         if ($config{make_behaviour} and  -e $new_fn and (stat($fn))[9] < (stat($new_fn))[9]){
             return;
         }
-        print STDERR "Processing File '$fn'..." unless $Quiet;
+        print STDERR "Processing File '$fn'..." unless $config{quiet};
 
         my $metadata = get_meta_data($fn);
         push @{$metadata->{FILES}}, $fn;
@@ -771,10 +770,10 @@ sub process_file {
         print $tmp_fh $header, $str, $footer;
         close $tmp_fh;
         if (compare($new_fn, $tmp_name) == 0){
-            print STDERR " not changed\n" unless $Quiet;
+            print STDERR " not changed\n" unless $config{quiet};
         } else {
             copy($tmp_name, $new_fn);
-            print STDERR " done\n" unless $Quiet;
+            print STDERR " done\n" unless $config{quiet};
         }
     } else {
         if (compare($fn, $new_fn) == 0){
