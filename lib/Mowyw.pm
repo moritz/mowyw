@@ -193,7 +193,7 @@ sub p_system {
     my $tokens = shift;
     my $meta = shift;
     my $fn = strip_ws(slurp_upto_token($tokens, 'TAG_END', $meta));
-    print STDERR "Executing external command '$fn'\n" ; #unless $Quiet;
+    print STDERR "Executing external command '$fn'\n" unless $config{quiet};
     my $tmp = `$fn`;
     return ($tmp);
 }
