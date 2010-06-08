@@ -104,7 +104,6 @@ sub parse_all_in_dir {
         }
         closedir DIR;
     }
-    print STDERR "Processed $processed_files_count files in total.\n";
 }
 
 sub process_dir {
@@ -756,9 +755,7 @@ sub process_file {
         if ($config{make_behaviour} and  -e $new_fn and (stat($fn))[9] < (stat($new_fn))[9]){
             return;
         }
-        print STDERR "Processing File '$fn'..." unless $Quiet;
-        $processed_files_count++;
-		
+        print STDERR "Processing File '$fn'..." unless $config{quiet};
 
         my $metadata = get_meta_data($fn);
         push @{$metadata->{FILES}}, $fn;
