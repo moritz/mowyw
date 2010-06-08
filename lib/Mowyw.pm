@@ -88,7 +88,7 @@ sub parse_all_in_dir {
             # and while we are at ignoring, we can ignore a few
             # other things as well ;-)
             if (
-                       $f eq '..'  
+                       $f eq '..'
                     or $f eq '.'
                     or $f eq  '.svn'
                     or $f =~ m{(?:~|\.swp)$}){
@@ -161,8 +161,8 @@ sub p_text {
             UNMATCHED => 1,
             );
 
-    while (     $tokens 
-            and $tokens->[0] 
+    while (     $tokens
+            and $tokens->[0]
             and $tokens->[0]->[0]
             and ($allowed_tokens{$tokens->[0]->[0]}
                 or $a{$tokens->[0]->[0]})){
