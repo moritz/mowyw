@@ -53,6 +53,7 @@ my @input_tokens = (
         [ 'KEYWORD',        qr/(?:
              include
             |menu
+            |system
             |option
             |item
             |endverbatim
@@ -103,6 +104,7 @@ sub parse_all_in_dir {
         }
         closedir DIR;
     }
+    print STDERR "Processed $processed_files_count files in total.\n";
 }
 
 sub process_dir {
@@ -185,6 +187,16 @@ sub p_include {
     my $m = my_dclone($meta);
     unshift @{$m->{FILES}}, $fn;
     return parse_file($fn, $m);
+}
+
+# parse sub: parse a system statement.
+sub p_system {
+    my $tokens = shift;
+    my $meta = shift;
+    my $fn = strip_ws(slurp_upto_token($tokens, 'TAG_END', $meta));
+    print STDERR "Executing external command '$fn'\n" ; #unless $Quiet;
+    my $tmp = `$fn`;
+    return ($tmp);
 }
 
 # parse sub: parse a 'menu' statement.
@@ -636,6 +648,7 @@ sub parse_tokens {
 
             my %dispatch = (
                 include     => \&p_include,
+                system      => \&p_system,
                 menu        => \&p_menu,
                 item        => \&p_item,
                 option      => \&p_option,
@@ -743,7 +756,9 @@ sub process_file {
         if ($config{make_behaviour} and  -e $new_fn and (stat($fn))[9] < (stat($new_fn))[9]){
             return;
         }
-        print STDERR "Processing File '$fn'..." unless $config{quiet};
+        print STDERR "Processing File '$fn'..." unless $Quiet;
+        $processed_files_count++;
+		
 
         my $metadata = get_meta_data($fn);
         push @{$metadata->{FILES}}, $fn;
