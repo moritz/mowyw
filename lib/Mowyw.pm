@@ -505,7 +505,7 @@ sub p_readvar {
     my %options = parse_hash($rest, 'readvar', $meta);
     my $c = resolve_var($name, $meta);
 
-    if (lc $options{escape} eq 'html'){
+    if (defined $options{escape} && lc $options{escape} eq 'html'){
         return encode_entities($c);
     }
     return $c if defined $c;
