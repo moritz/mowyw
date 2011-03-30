@@ -24,9 +24,9 @@ sub _read_data {
     my ($self, $file) = @_;
     my $data;
     if (exists $self->{OPTIONS}{root}){
-        $data = XMLin($file, ForceArray => [ $self->{OPTIONS}{root} ]);
+        $data = XML::Simple->new->parse_file($file, ForceArray => [ $self->{OPTIONS}{root} ]);
     } else {
-        $data = XMLin($file);
+        $data = XML::Simple->new->parse_file($file);
     }
     if (reftype $data eq 'ARRAY'){
         return $data;
