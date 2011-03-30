@@ -1,3 +1,6 @@
+mowyw (0.6.2)
+	* lib/Mowyw/Datasource/XML.pm: more robust XML reading
+	* example/: added missing files
 mowyw (0.6.1)
 	* lib/Mowyw.pm: silenced warning on [% readvar %]
 mowyw (0.6.0)
