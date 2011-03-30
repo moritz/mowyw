@@ -40,3 +40,4 @@
 # Avoid archives of this distribution
 \bmowyw-[\d\.\_]+
 ^MYMETA.yml$
+example/online/*
