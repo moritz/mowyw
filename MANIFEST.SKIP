@@ -42,3 +42,4 @@
 \bmowyw-[\d\.\_]+
 ^MYMETA.yml$
 example/online/*
+^MYMETA\.json$
