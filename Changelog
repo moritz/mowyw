@@ -1,3 +1,7 @@
+mowyw (0.7.0)
+	* lib/: revamped modules to live in the App:: namespace in preparation of
+	a CPAN release
+	* script/: new directory for the mowyw script
 mowyw (0.6.2)
 	* lib/Mowyw/Datasource/XML.pm: more robust XML reading
 	* example/: added missing files

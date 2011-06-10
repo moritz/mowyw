@@ -3,7 +3,7 @@ use strict;
 use warnings;
 #use warnings FATAL => 'all';
 
-our $VERSION = '0.6.2';
+our $VERSION = '0.7.0';
 
 use App::Mowyw::Lexer qw(lex);
 use App::Mowyw::Datasource;

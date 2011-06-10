@@ -1,32 +1,27 @@
-MOWYW(1)
-========
-Moritz Lenz <moritz@faui2k3.org>
+=head1 NAME
 
+mowyw - Macro processor and Offline Content Management System
 
-NAME
-----
-mowyw - Offline content management system
+=head1 SYNOPSIS
 
-SYNOPSIS
---------
- - *mowyw* 
- - *mowyw* `--make --source-prefix sp --destination-prefix dp --menu-prefix mp
-           --includes-prefix=ip --postifx=.html --quiet`
+    $ mowyw 
+    $ mowyw --make --source-prefix sp --destination-prefix dp --menu-prefix mp
+           --includes-prefix=ip --postifx=.html --quiet
 
-DESCRIPTION
------------
+=head1 DESCRIPTION
+
 mowyw is a text processor for building static websites. It supports includes,
 menus, external datasources (like XML files or databases) and syntax
 hilighting.
 
-To use mowyw you need three directories called *source*, *online* and
-*includes*. `source` holds the source files that are to be interpreted by
+To use mowyw you need three directories called B<source>, B<online> and
+B<includes>. C<source> holds the source files that are to be interpreted by
 mowyw. When you run mowyw, it will walk (recursively) through the source dir,
-and for each file it either copies it verbatimely to `online`, or, if the file
+and for each file it either copies it verbatimely to C<online>, or, if the file
 looks like HTML (ends on .html, .shtml, .htm etc.) it is processed by mowyw,
 and the output is written into the online dir.
 
-In `includes/` are include files (how surprising), header, footer, global
+In C<includes/> are include files (how surprising), header, footer, global
 include files, and optionally data source files.
 
 You should always execute mowyw from the parent directory of these three
@@ -35,100 +30,189 @@ directories.
 The name of these three directories can be overridden with command line
 options.
 
-COMMAND LINE OPTIONS
---------------------
+=head1 COMMAND LINE OPTIONS
 
- * `--make`
-   Only process files with a newer timestamp than the corresponding `online/'
-   file.
- * `--quiet`
-   Don't produce diagnostics or progress output
- * `--postfix`
-   Append the given postfix to the filename of all included file names (and
-   menu files). Defaults to the empty string.
- * `--includes-prefix`
-   Change the search path for include files. Defaults to `includes/'.
- * `--menu-prefix`
-   Change the search for menu files. Defaults to `includes/menu-`.
- * `--destination-prefix`
-   Change the path for the output files. Defaults to `online/'.
- * `--source-prefix`
-   Change the search path for source files. Defaults to `source/'. Must be a
-   directory.
- * `--encoding`
-   Interpret all input files to have that encoding. Defaults to UTF-8.
-   (Conjecture: should default to the current locale... what to do?).
+=over
 
-All options except `--make` can be specified in a config file, with more
+=item --make
+
+Only process files with a newer timestamp than the corresponding C<online/>
+file. Note that this does not account for dependencies on include files and menu
+files.
+
+=item --quiet
+
+Don't produce diagnostics or progress output
+
+=item --postfix
+
+Append the given postfix to the filename of all included file names (and
+menu files). Defaults to the empty string.
+
+=item --includes-prefix
+
+Change the search path for include files. Defaults to C<includes/>.
+
+=item --menu-prefix
+
+Change the search for menu files. Defaults to C<includes/menu->.
+
+=item --destination-prefix
+
+Change the path for the output files. Defaults to C<online/>.
+
+=item --source-prefix
+
+Change the search path for source files. Defaults to C<source/>. Must be a
+directory.
+
+=item --encoding
+
+Interpret all input files to have that encoding. Defaults to UTF-8.
+(Conjecture: should default to the current locale... what to do?).
+
+=back
+
+All options except C<--make> can be specified in a config file, with more
 customization options.
 
-PROCESSING ORDER
-----------------
+=head1 PROCESSING ORDER
+
 mowyw processes files in several steps:
 
- * The file *mowyw.conf* is read (if it exists)
- * The source directory is traversed
- * For all source file that is actually processed
-    - the file *includes/global* is read, if it exists
-    - the current file is read, all markup is processed
-    - the file *includes/header* is processed and prepended to the current
-      output file
-    - the file *includes/footer* is processed and appended to the current
-      output file
+=over
 
-MARKUP
-------
+=item
+
+The file *mowyw.conf* is read (if it exists)
+
+=item
+
+The source directory is traversed
+
+=item
+
+For all source file that is actually processed
+
+=over 8
+
+=item -
+
+the file C<includes/global> is read, if it exists
+
+=item -
+
+the current file is read, all markup is processed
+     
+=item -
+
+the file C<includes/header> is processed and prepended to the current
+output file
+
+=item -
+
+the file C<includes/footer> is processed and appended to the current
+output file
+
+=back
+
+=back
+
+
+=head1 MARKUP
+
 Normal text (including HTML markup) is copied verbatimely to the output file.
 
-Special directives are delimited either with `[% ... %]` (preferred) or with
-`[[[ ... ]]]` (deprecated, but still supported for compatibility). 
+Special directives are delimited either with C<[% ... %]> (preferred) or with
+C<[[[ ... ]]]> (deprecated, but still supported for compatibility). 
 
 Many elements take options, which are usually whitespace delimited, for
-example `[% include includefile.html %]`.
+example C<[% include includefile.html %]>.
 
 Inline elements consist only of one tag, while block elements run until the
 matching end tag. 
 
 The following inline elements are supported:
 
- * `include` includes a file, and processes it. Example: `[% include
-   coypright.html %]`.
- * `menu` refers to a menu. See section <<menu,MENUES>> below.
- * `item` defines a menu item. See section <<menu,MENUES>> below.
- * `option` sets an option, for example `[% option no-header %]`. See section
-    <<options,OPTIONS>> below.
- * `comment` ignores everything up to the tag end. Example: `[% comment this
-    comments appears nowhere in the output %]`.
- * `setvar` sets a variable. Example: `[% setvar title Title of this page%]`.
- * `readvar` reads and outputs a variable. You can optionally specify an
-    escape mechanism. Example: `<h1>[% readvar title %]</h1>` or `[% readvar
-    db.column escape:html %]`.
- * `bind` binds a variable to a datasource. See section <<datasource,DATA
-   SOURCES>> below.
+=over
+
+=item
+
+C<include> includes a file, and processes it. Example:
+C<`[% include coypright.html %]>.
+
+=item
+
+C<menu> refers to a menu. See section L</MENUES> below.
+
+=item
+
+C<item> defines a menu item. See section L</MENUES> below.
+
+=item
+
+C<option> sets an option, for example C<[% option no-header %]>. See section
+L</OPTIONS> below.
+
+=item
+
+C<comment> ignores everything up to the tag end. Example: C<[% comment this
+comments appears nowhere in the output %]>.
+
+=item
+
+C<setvar> sets a variable. Example: C<[% setvar title Title of this page%]>.
+
+=item
+
+C<readvar> reads and outputs a variable. You can optionally specify an
+escape mechanism. Example: C<< <h1>[% readvar title %]</h1> >> or
+C<< [% readvar db.column escape:html %] >>.
+
+=item
+
+C<bind> binds a variable to a datasource. See section L</DATA SOURCES> below.
+
+=back
 
 
 The following block elements are supported:
 
- * `verbatim` reads the file until it finds an `endverbatim` tag. It expects a
-   marker, which must be present at the end tag as well. Everything inbetween
-   is taken verbatimly, i.e. it is not processed at all. Keywords are not
-   allowed as markers. Example: 
-   `[% verbatim foo %] Some [% non-processed %] markup [% endverbatim foo %]`
- * `syntax` uses vim(1) to do syntax hilighting. Expects the name of the
-   language or configuration as its only argument. Example: `<pre>[%syntax
-   perl%]print "Hello, world\n";[%endsyntax%]</pre>`. The pseudo-syntax
-   `escape` HTML-escapes the string and doesn't to any other syntax
-   hilighting.
- * `for` iterates of a datasource. See section <<datasource,DATA SOURCES>> 
-   below.
- * `ifvar` executes the block only if the variable is defined.
-    Example: `[% ifvar title %]<h1>[%readvar title%]</h1>[% endifvar %]`.
+=over
+
+=item
+
+C<verbatim> reads the file until it finds an C<endverbatim> tag. It expects a
+marker, which must be present at the end tag as well. Everything inbetween
+is taken verbatimly, i.e. it is not processed at all. Keywords are not
+allowed as markers. Example: 
+C<[% verbatim foo %] Some [% non-processed %] markup [% endverbatim foo %]>
+
+=item
+
+C<syntax> uses vim(1) to do syntax hilighting. Expects the name of the
+language or configuration as its only argument. Example: `<pre>[%syntax
+perl%]print "Hello, world\n";[%endsyntax%]</pre>`. The pseudo-syntax
+C<escape> HTML-escapes the string and doesn't to any other syntax
+hilighting.
+
+=item
+
+C<for> iterates of a datasource. See section <<datasource,DATA SOURCES>> 
+below.
+
+=item
+
+C<ifvar> executes the block only if the variable is defined.
+Example: C<[% ifvar title %]<h1>[%readvar title%]</h1>[% endifvar %]>.
+
+=back
    
-[[menu]]
-MENUES
-------
-mowyw has special menu support. To define a menu named `foo`, create a file
-`source/menu-foo` with the following contents:
+
+=head1 MENUES
+
+mowyw has special menu support. To define a menu named C<foo>, create a file
+C<source/menu-foo> with the following contents:
 
    <h2>Your menu title</h2>
    <ul>
@@ -144,24 +228,26 @@ mowyw has special menu support. To define a menu named `foo`, create a file
        </li>   %]
    </ul>
 
+(The menu name is purely for your internal use, it will appear nowhere in the
+output)
+
 Now in your index page you can include that menu with the directive 
-`[% menu home %]`. This will produce the menu contents with the markup
-stripped, and insde the `home` all of the contents will appear, the other menu
-items only contribute the parts that are *not* enclosed in double curly
+C<[% menu home %]>. This will produce the menu contents with the markup
+stripped, and insde the C<home> all of the contents will appear, the other menu
+items only contribute the parts that are B<not> enclosed in double curly
 braces.
 
 Menus can ben nested, a nested menu entry can be accessed for example with
-`[% menu sec subitem1 %]`.
+C<[% menu sec subitem1 %]>.
 
 It's best to take a look at the examples in the distribution, which should
 nicely illustrate the menu mechanism.
 
 
-[[syntax_hilight]]
-SYNTAX HILIGHTING
------------------
-Syntax hilighting requires http://www.vim.org/[vim] and
-http://search.cpan.org/perldoc?Text::VimColor[Text::VimColor] to be installed
+=head1 SYNTAX HILIGHTING
+
+Syntax hilighting requires vim (see L<http://www.vim.org/>) and
+L<Text::VimColor> to be installed
 (otherwise the code is just HTML escaped, not hilighted).
 
 Since you can't tell vim which encoding a source file is in,
@@ -169,23 +255,21 @@ non-ASCII-characters might not survive the round trip to vim if the locales
 don't fit. On my systems UTF-8 locales worked, everything else didn't. So use
 with caution.
 
-[[options]]
-OPTIONS
--------
-Currently only two options are supported, `no-header` and `no-footer`.
-If they are set in a file via `[% option no-header %]`, the inclusion of
+=head1 OPTIONS
+
+Currently only two options are supported, C<no-header> and C<no-footer>.
+If they are set in a file via C<[% option no-header %]>, the inclusion of
 header or footer files will be omitted.
 
 
-DATA SOURCES
-------------
-[[datasource]]
-You can access external data sources by first `bind`'ing a variable to a
-data source, and then iterating with a `for` loop over that source.
+=head1 DATA SOURCES
+
+You can access external data sources by first C<bind>'ing a variable to a
+data source, and then iterating with a C<for> loop over that source.
 
 This is best illustrated with a short example.
 
-File `includes/news.xml`:
+File C<includes/news.xml>:
         
     <rootTag>
         <item>
@@ -222,7 +306,7 @@ supported.
 
 DBI is perls generic database interface. You can use it to access a database.
 This has some limitations, for example you can't reuse database connections,
-so every `bind` statement actually opens a database connection on its own.
+so every C<bind> statement actually opens a database connection on its own.
 
 For the brave, here is an example of how to use it:
 
@@ -237,23 +321,35 @@ For the brave, here is an example of how to use it:
 
 The options are as follows:
 
- * The `dsn` option is the "data source name" that `DBI`'s `connect` method
-   accepts. It always starts with `DBI:`, then followed by the driver name
-   like `mysql` or `Pg` (for Postgres) and the driver options.
- * The `encoding` option is optional and defaults to `utf-8`. You can use 
-   any character encoding here that Perl's cool `Encode` module supports,
-   which is quite a many.
- * the `password` and `username` options can be omitted if your database
-   doesn't ask for them
+=over
+
+=item
+
+The C<dsn> option is the "data source name" that C<DBI>'s C<connect> method
+accepts. It always starts with C<DBI:>, then followed by the driver name
+like C<mysql> or C<Pg> (for Postgres) and the driver options.
+
+=item
+
+The C<encoding> option is optional and defaults to C<utf-8>. You can use 
+any character encoding here that Perl's cool C<Encode> module supports,
+which is quite a many.
+
+=item
+
+the C<password> and C<username> options can be omitted if your database
+doesn't ask for them
+
+=back
 
 This plugin may seem weird if you don't know Perl and its database module. If
 that's the case, consider toying around with Perl and DBI first (it's really
 worth a try).
 
-CONFIGURATION FILE
-------------------
-[[config]]
-Mowyw tries to read a file called `mowyw.conf`. Within that file you can
+
+=head1 CONFIGURATION FILE
+
+Mowyw tries to read a file called C<mowyw.conf>. Within that file you can
 configure include pathes and file names on a per-file base, and you can
 specify which files should be processed.
 
@@ -269,21 +365,21 @@ An example config file might look like this:
 
 The first part defines two sections called "german" and "english". 
 If a file matches the
-regular expression `\.de`, it is treated as being in section "german". All
+regular expression C<\.de>, it is treated as being in section "german". All
 include files will have the postfix '.de', which means that if a file is
-called `source/index.html.de`, the header file will be `includes/header.de`, a
-menu `foo` will be searched for in file `includes/menu-foo.de` etc.
+called C<source/index.html.de>, the header file will be C<includes/header.de>, a
+menu C<foo> will be searched for in file C<includes/menu-foo.de> etc.
 
 This configuration mechanism is primarily intented for creating mutilingual
 sites, but might be useful for other things as well.
 
-The second part consists of `INCLUDE` and `EXCLUDE` statements with their
+The second part consists of C<INCLUDE> and C<EXCLUDE> statements with their
 priority and the regex they match. Higher priority rules are tested first.
-When a rule matches the file is either processed (in the case of an `INCLUDE`
-option) or just verbatimly copied (in case of an `EXCLUDE` option). 
+When a rule matches the file is either processed (in the case of an C<INCLUDE>
+option) or just verbatimly copied (in case of an C<EXCLUDE> option). 
 
 Due to an limition of the module that reads the config file
-(http://search.cpan.org?Config::File[Config::File]) the
+([mod://Config::File]) the
 only way to specify rules with the same priority is to prefix them with
 distinct strings:
 
@@ -294,49 +390,61 @@ is equivalent to
     
     INCLUDE[5]  = foo|bar
 
-Don't give `INCLUDE` and `EXCLUDE`-options with the same priority, the
+Don't give C<INCLUDE> and C<EXCLUDE>-options with the same priority, the
 behaviour in that case is undefined.
 
-RESOURCES
----------
+=head1 SEE ALSO
 
-If something isn't clear to you, please take a look into the  `README` file
+If something isn't clear to you, please take a look into the  C<README> file
 and the examples in the source tarball. If that doesn't answer your questions,
 don't hesitate to contact the author.
 
 The official website can be found here:
-http://perlgeek.de/en/software/mowyw[Mowyw homepage].
+L<http://perlgeek.de/en/software/mowyw>.
 
-BUGS AND LIMITATIONS
---------------------
+=head1 BUGS AND LIMITATIONS
+o
 mowyw was written to get its author's job done, and it does that well. While
 it was written with generality in mind, there are still some restrictions that
 were accepted as a tradeoff for simplicity.
 
- * Error messages aren't very useful for the uninitiated, though the line
-   number makes it pretty obvious where to search for for the error.
- * Disk space: mowyw keeps two complete copies of a project on disk, the
-   source files and the resulting online files. This might not be optimal, and
-   consumes unnecessary space for files that are not processed anyway.
- * Memory: mowyw is written in Perl, which is not know to be terribly memory
-   efficient. Additionally it slurps the files into memory before parsing,
-   which isn't terribly efficient either. But it's simple, and if it's not
-   enough for you, go get a bigger machine (or contribute a stream tokenizer
-    and parser).
- * There are some limitations due to multi-pass parsing. For example you can't
-   include the string `%]` in SQL statements, because it is considered to be a
-   tag closer by the lexer. A future rewrite might change that.
+=over
 
+=item 
 
-AUTHOR
-------
+Error messages from the lexer and parser aren't very useful for the uninitiated,
+though the line
+number makes it pretty obvious where to search for for the error.
 
-Written by http://perlgeek.de/[Moritz Lenz], mailto:moritz@faui2k3.org[].
+=item 
 
-COPYRIGHT 
----------
+Disk space: mowyw keeps two complete copies of a project on disk, the
+source files and the resulting online files. This might not be optimal, and
+consumes unnecessary space for files that are not processed anyway.
 
-Copyright 2006 - 2009 by Moritz Lenz.
+=item 
+
+Memory: mowyw is written in Perl, which is not know to be terribly memory
+efficient. Additionally it slurps the files into memory before parsing,
+which isn't terribly efficient either. But it's simple, and if it's not
+enough for you, go get a bigger machine (or contribute a stream tokenizer
+and parser).
+
+=item 
+
+There are some limitations due to multi-pass parsing. For example you can't
+include the string C<%]> in SQL statements, because it is considered to be a
+tag closer by the lexer. A future rewrite might change that.
+
+=back
+
+=head1 AUTHOR
+
+Written by Moritz Lenz, L<http://perlgeek.de/>, L<mailto:moritz@faui2k3.org>.
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2006 - 2011 by Moritz Lenz.
 
 This is free software.  You may redistribute copies  of  it  under  the terms
 of the Artistic License 2 as published by The Perl Foundation.
@@ -345,3 +453,4 @@ of the Artistic License 2 as published by The Perl Foundation.
 
 There is NO WARRANTY, to the extent permitted by law.
 
+=cut
