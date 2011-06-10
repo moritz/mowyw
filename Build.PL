@@ -24,6 +24,7 @@ my $build = Module::Build->new(
     },
     recommends         => {
         'DBI'               => 0,
+        'Text::VimColor'    => 0,
         'XML::Simple'       => 0,
     },
     script_files        => [ qw(
