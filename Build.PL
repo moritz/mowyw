@@ -28,7 +28,7 @@ my $build = Module::Build->new(
         'XML::Simple'       => 0,
     },
     script_files        => [ qw(
-        mowyw
+        script/mowyw
     )],
     sign               => 0,
 );
