@@ -21,26 +21,26 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin/lib";
 require 5.008001;
-use Mowyw qw(get_config process_file process_dir parse_all_in_dir);
+use App::Mowyw qw(get_config process_file process_dir parse_all_in_dir);
 
 use Getopt::Long;
-$Mowyw::config{make_behaviour} = undef;
+$App::Mowyw::config{make_behaviour} = undef;
 my $result = GetOptions(
-        "make"                  => \$Mowyw::config{make_behaviour},
-        "postfix=s"             => \$Mowyw::config{default}{postfix},
-        "includes-prefix=s"     => \$Mowyw::config{default}{include},
-        "menu-prefix=s"         => \$Mowyw::config{default}{menu},
-        "destination-prefix=s"  => \$Mowyw::config{default}{online},
-        "source-prefix=s"       => \$Mowyw::config{default}{source},
-        "encoding=s"            => \$Mowyw::config{encoding},
-        "quiet"                 => \$Mowyw::config{quiet},
+        "make"                  => \$App::Mowyw::config{make_behaviour},
+        "postfix=s"             => \$App::Mowyw::config{default}{postfix},
+        "includes-prefix=s"     => \$App::Mowyw::config{default}{include},
+        "menu-prefix=s"         => \$App::Mowyw::config{default}{menu},
+        "destination-prefix=s"  => \$App::Mowyw::config{default}{online},
+        "source-prefix=s"       => \$App::Mowyw::config{default}{source},
+        "encoding=s"            => \$App::Mowyw::config{encoding},
+        "quiet"                 => \$App::Mowyw::config{quiet},
     );
 
-($Mowyw::config{per_fn}, $Mowyw::config{file_filter}) = get_config();
+($App::Mowyw::config{per_fn}, $Mowyw::config{file_filter}) = get_config();
 #use Data::Dumper;
-#print Dumper $Mowyw::config{file_filter};
+#print Dumper $App::Mowyw::config{file_filter};
 
-parse_all_in_dir($Mowyw::config{default}{source});
+parse_all_in_dir($App::Mowyw::config{default}{source});
 __END__
 
 =head1 NAME

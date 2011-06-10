@@ -1,16 +1,16 @@
 #!/usr/bin/perl
 use warnings;
 use strict;
-package Mowyw::Lexer;
+package App::Mowyw::Lexer;
 
 =pod
 =head1 NAME
 
-Mowyw::Lexer - Simple Lexer
+App::Mowyw::Lexer - Simple Lexer
 
 =head1 SYNOPSIS
     
-    use Mowyw::Lexer qw(lex);
+    use App::Mowyw::Lexer qw(lex);
     # suppose you want to parse simple math expressions
     my @input_tokens = (
         ['Int',     qr/(?:-|\+)?\d+/],
@@ -28,7 +28,7 @@ Mowyw::Lexer - Simple Lexer
 
 =head1 DESCRIPTION
 
-Mowyw::Lexer is a simple lexer that breaks up a text into tokens according to
+App::Mowyw::Lexer is a simple lexer that breaks up a text into tokens according to
 regexes you provide.
 
 The only exported subroutine is C<lex>, which expects input text as its first

@@ -14,19 +14,19 @@ BEGIN {
 }
 
 BEGIN {
-    use_ok 'Mowyw::Datasource';
-    use_ok 'Mowyw::Datasource::XML';
+    use_ok 'App::Mowyw::Datasource';
+    use_ok 'App::Mowyw::Datasource::XML';
 }
 
 my $x = eval {
-    Mowyw::Datasource->new({
+    App::Mowyw::Datasource->new({
             type    => 'XML',
             file    => 't/sample.xml',
     });
 };
 
 print $@ if $@;
-ok !$@, 'No errors while creating Mowyw::Datasource::XML instance';
+ok !$@, 'No errors while creating App::Mowyw::Datasource::XML instance';
 
 
 ok !$x->is_exhausted,           'Iterator not yet exhausted';
@@ -48,7 +48,7 @@ ok $x->is_exhausted,            'Iterator exhausted';
 
 # next test file
 
-$x = Mowyw::Datasource->new({
+$x = App::Mowyw::Datasource->new({
         type    => 'XML',
         file    => 't/sample-single.xml',
         root    => 'item',
@@ -63,7 +63,7 @@ $x->next();
 ok $x->is_exhausted,            'Iterator exhausted';
 
 eval {
-    Mowyw::Datasource->new({
+    App::Mowyw::Datasource->new({
             type    => 'XML',
             file    => 't/sample-bad.xml',
     });
@@ -73,7 +73,7 @@ ok $@,                          'Dies with ambigous root element';
 
 # test limits
 $x = eval {
-    Mowyw::Datasource->new({
+    App::Mowyw::Datasource->new({
             type    => 'XML',
             file    => 't/sample.xml',
             limit   => 2,

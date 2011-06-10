@@ -4,19 +4,19 @@ use lib qw(blib);
 use Test::More tests => 12;
 
 BEGIN {
-    use_ok 'Mowyw::Datasource';
-    use_ok 'Mowyw::Datasource::Array';
+    use_ok 'App::Mowyw::Datasource';
+    use_ok 'App::Mowyw::Datasource::Array';
 }
 
 my $a = eval {
-    Mowyw::Datasource->new({
+    App::Mowyw::Datasource->new({
             type    => 'Array',
             source  => [qw(foo bar baz)],
     });
 };
 
 print $@ if $@;
-ok !$@, 'No errors while creating Mowyw::Datasource::Array instance';
+ok !$@, 'No errors while creating App::Mowyw::Datasource::Array instance';
 
 ok !$a->is_exhausted(),        'fresh iterator not exhausted';
 is $a->get(),       'foo',      'First item correct';
@@ -33,7 +33,7 @@ $a->next();
 ok $a->is_exhausted,            'Iterator now exhausted';
 
 eval {
-    Mowyw::Datasource->new({
+    App::Mowyw::Datasource->new({
             type    => 'Array',
     });
 };
@@ -41,7 +41,7 @@ eval {
 ok $@,                          'new() dies when "source" argument is missing';
 
 eval {
-    Mowyw::Datasource->new({
+    App::Mowyw::Datasource->new({
             type    => 'Array',
             source  => { a => 'b' },
     });

@@ -1,12 +1,12 @@
-package Mowyw;
+package App::Mowyw;
 use strict;
 use warnings;
 #use warnings FATAL => 'all';
 
 our $VERSION = '0.6.2';
 
-use Mowyw::Lexer qw(lex);
-use Mowyw::Datasource;
+use App::Mowyw::Lexer qw(lex);
+use App::Mowyw::Datasource;
 
 use File::Temp qw(tempfile);
 use File::Compare;
@@ -272,7 +272,7 @@ sub p_bind {
     if ($options{file}){
         $options{file} = get_include_filename('include', $options{file}, $meta->{FILES}->[-1]);
     }
-    $meta->{VARS}{$var} = Mowyw::Datasource->new(\%options);
+    $meta->{VARS}{$var} = App::Mowyw::Datasource->new(\%options);
 
     return '';
 }
@@ -441,7 +441,7 @@ sub parse_hash {
 
 sub my_dclone {
     # dclone can't handle code references, which is very bad
-    # becase DBI objects from Mowyw::Datasource::DBI hold code refs.
+    # becase DBI objects from App::Mowyw::Datasource::DBI hold code refs.
     # so we don't clone blessed objects at all, but pass a reference instead.
     my $meta = shift;
     my %result;
@@ -739,8 +739,8 @@ sub process_file {
     # process file at all?
     my $process = 0;
 #    use Data::Dumper;
-#    print Dumper $Mowyw::config{file_filter};
-    for my $f(@{$Mowyw::config{file_filter}}){
+#    print Dumper $App::Mowyw::config{file_filter};
+    for my $f(@{$App::Mowyw::config{file_filter}}){
         my ($include, undef, $re) = @$f;
         if ($fn =~ m/$re/){
             $process = $include;

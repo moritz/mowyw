@@ -2,9 +2,9 @@ use Test::More tests => 3;
 use strict;
 use warnings;
 
-BEGIN { use_ok('Mowyw', 'parse_str'); };
+BEGIN { use_ok('App::Mowyw', 'parse_str'); };
 
-$Mowyw::Quiet = 1;
+$App::Mowyw::Quiet = 1;
 
 {
     # Test without Vim::TextColor first

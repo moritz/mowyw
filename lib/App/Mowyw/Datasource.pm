@@ -1,4 +1,4 @@
-package Mowyw::Datasource;
+package App::Mowyw::Datasource;
 use strict;
 use warnings;
 use Carp qw(confess);
@@ -14,7 +14,7 @@ sub new {
     my $type = lc($opts->{type}) or confess "No 'type' given";
     delete $opts->{type};
     my $type_name = $type_map{$type} || confess "Don't know what to do with datasource type '$type'";
-    $type_name = "Mowyw::Datasource::$type_name";
+    $type_name = "App::Mowyw::Datasource::$type_name";
     eval "use $type_name;";
     confess $@ if $@;
     my $obj =  eval $type_name . "->new(\$opts)" or confess $@;

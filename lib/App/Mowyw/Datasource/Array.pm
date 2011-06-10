@@ -1,8 +1,8 @@
-package Mowyw::Datasource::Array;
+package App::Mowyw::Datasource::Array;
 
 use strict;
 use warnings;
-use base 'Mowyw::Datasource';
+use base 'App::Mowyw::Datasource';
 use Scalar::Util qw(reftype);
 
 use Carp qw(confess);

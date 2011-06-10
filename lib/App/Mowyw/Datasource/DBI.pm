@@ -1,11 +1,11 @@
-package Mowyw::Datasource::DBI;
+package App::Mowyw::Datasource::DBI;
 use strict;
 use warnings;
 use 5.008;
 use Encode qw(decode); 
 use DBI;
 use Carp qw(confess);
-use base 'Mowyw::Datasource';
+use base 'App::Mowyw::Datasource';
 
 sub new {
     my ($class, $opts) = @_;

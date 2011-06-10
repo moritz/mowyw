@@ -2,12 +2,12 @@ use Test::More tests => 6;
 use strict;
 use warnings;
 
-BEGIN { use_ok('Mowyw', 'parse_str'); };
+BEGIN { use_ok('App::Mowyw', 'parse_str'); };
 
 my %meta = ( VARS => {}, FILES => [qw(t/menu.t)]);
-$Mowyw::config{default}{include} = 't/';
-$Mowyw::config{default}{menu}    = 't/menu-';
-$Mowyw::config{default}{postfix} = '';
+$App::Mowyw::config{default}{include} = 't/';
+$App::Mowyw::config{default}{menu}    = 't/menu-';
+$App::Mowyw::config{default}{postfix} = '';
 
 
 is  parse_str('[% menu sample %]', \%meta),

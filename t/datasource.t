@@ -12,12 +12,12 @@ BEGIN {
     }
 }
 
-BEGIN { use_ok('Mowyw', 'parse_str'); };
+BEGIN { use_ok('App::Mowyw', 'parse_str'); };
 
 my %meta = ( VARS => {}, FILES => [qw(t/datasource.t)]);
 
-$Mowyw::config{default}{include} = 't/';
-$Mowyw::config{default}{postfix} = '';
+$App::Mowyw::config{default}{include} = 't/';
+$App::Mowyw::config{default}{postfix} = '';
 
 is parse_str('[% bind a type:xml file:sample.xml root:item %]', \%meta),
     '',

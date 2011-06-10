@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use lib 'lib';
-use Mowyw::Lexer qw(lex);
+use App::Mowyw::Lexer qw(lex);
 use Test::More tests => 13;
 
 my @tokens = (

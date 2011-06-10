@@ -2,7 +2,7 @@ use Test::More tests => 8;
 use strict;
 use warnings;
 
-BEGIN { use_ok('Mowyw', 'parse_str'); };
+BEGIN { use_ok('App::Mowyw', 'parse_str'); };
 
 my %meta = ( VARS => {} );
 

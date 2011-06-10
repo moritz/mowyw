@@ -2,15 +2,15 @@ use Test::More tests => 6;
 use strict;
 use warnings;
 
-BEGIN { use_ok('Mowyw', 'parse_all_in_dir'); };
+BEGIN { use_ok('App::Mowyw', 'parse_all_in_dir'); };
 
 my %meta = ( VARS => {} );
 
-$Mowyw::config{default}{include} = 't/complete/includes/';
-$Mowyw::config{default}{source}  = 't/complete/source/';
-$Mowyw::config{default}{online}  = 't/complete/online/';
-$Mowyw::config{default}{postfix} = '';
-$Mowyw::Quiet = 1;
+$App::Mowyw::config{default}{include} = 't/complete/includes/';
+$App::Mowyw::config{default}{source}  = 't/complete/source/';
+$App::Mowyw::config{default}{online}  = 't/complete/online/';
+$App::Mowyw::config{default}{postfix} = '';
+$App::Mowyw::Quiet = 1;
 
 ok eval {
     parse_all_in_dir('t/complete/source/');

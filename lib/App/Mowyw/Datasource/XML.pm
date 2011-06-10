@@ -1,8 +1,8 @@
-package Mowyw::Datasource::XML;
+package App::Mowyw::Datasource::XML;
 
 use strict;
 use warnings;
-use base 'Mowyw::Datasource::Array';
+use base 'App::Mowyw::Datasource::Array';
 use XML::Simple;
 use Scalar::Util qw(reftype);
 
