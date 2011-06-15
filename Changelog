@@ -1,3 +1,6 @@
+mowyw (0.7.1)
+	* script/mowyw: remove some fallout from the Mowyw -> App::Mowyw
+	transition (Kurt Tomlinson)
 mowyw (0.7.0)
 	* lib/: revamped modules to live in the App:: namespace in preparation of
 	a CPAN release

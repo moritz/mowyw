@@ -34,7 +34,7 @@ my $result = GetOptions(
         "quiet"                 => \$App::Mowyw::config{quiet},
     );
 
-($App::Mowyw::config{per_fn}, $Mowyw::config{file_filter}) = get_config();
+($App::Mowyw::config{per_fn}, $App::Mowyw::config{file_filter}) = get_config();
 #use Data::Dumper;
 #print Dumper $App::Mowyw::config{file_filter};
 
