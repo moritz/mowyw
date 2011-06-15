@@ -10,7 +10,10 @@ $App::Mowyw::config{default}{include} = 't/complete/includes/';
 $App::Mowyw::config{default}{source}  = 't/complete/source/';
 $App::Mowyw::config{default}{online}  = 't/complete/online/';
 $App::Mowyw::config{default}{postfix} = '';
-$App::Mowyw::Quiet = 1;
+{
+    no warnings 'once';
+    $App::Mowyw::Quiet = 1;
+}
 
 ok eval {
     parse_all_in_dir('t/complete/source/');
