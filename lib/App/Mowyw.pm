@@ -3,7 +3,7 @@ use strict;
 use warnings;
 #use warnings FATAL => 'all';
 
-our $VERSION = '0.7.0';
+our $VERSION = '0.7.1';
 
 use App::Mowyw::Lexer qw(lex);
 use App::Mowyw::Datasource;
@@ -552,9 +552,9 @@ sub do_hilight {
     if ($lang eq 'escape'){
         return encode_entities($str);
     }
-    eval { 
+    eval {
         no warnings "all";
-        require Text::VimColor; 
+        require Text::VimColor;
     };
     if ($@){
         # require was not successfull 
