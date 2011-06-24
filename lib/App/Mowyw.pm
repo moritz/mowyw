@@ -3,7 +3,7 @@ use strict;
 use warnings;
 #use warnings FATAL => 'all';
 
-our $VERSION = '0.7.1';
+our $VERSION = '0.7.2';
 
 use App::Mowyw::Lexer qw(lex);
 use App::Mowyw::Datasource;
@@ -80,8 +80,8 @@ sub parse_all_in_dir {
     my @todo = @_;
     while (my $fn = pop @todo){
         $fn .= '/' unless ($fn =~ m#/$#);
-        opendir DIR, $fn;
-        IW: while (my $f = readdir DIR){
+        opendir my $DIR, $fn or die "Cannot opend directory '$fn' for reading: $!";
+        IW: while (my $f = readdir $DIR){
             # ignore symbolic links and non-Readable files:
             next IW if (-l $f);
             # if we consider . and .., we loop infinetly.
@@ -102,7 +102,7 @@ sub parse_all_in_dir {
                 process_file($f);
             }
         }
-        closedir DIR;
+        closedir $DIR;
     }
 }
 

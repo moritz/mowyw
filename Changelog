@@ -1,3 +1,5 @@
+mowyw (0.7.2)
+	* lib/App/Mowyw.pm: guard against failed opendir()
 mowyw (0.7.1)
 	* script/mowyw: remove some fallout from the Mowyw -> App::Mowyw
 	transition (Kurt Tomlinson)
