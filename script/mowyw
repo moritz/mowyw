@@ -1,11 +1,7 @@
 #!/usr/bin/perl
-# mowyw - mowyw writes your websites - Copyright (C) 2006 Moritz Lenz
+# mowyw - mowyw writes your websites - Copyright (C) 2006 Moritz Lenz,
+# https://perlgeek.de/
 # For documentation please see the README file
-#   <moritz@faui2k3.org>
-#   Snail Mail address:
-#       Moritz Lenz
-#       Killingerstr. 92
-#       91056 Erlangen
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the Artistic License 2 as published by The Perl
