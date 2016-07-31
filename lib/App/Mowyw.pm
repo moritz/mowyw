@@ -78,7 +78,7 @@ my @input_tokens = (
 
 sub parse_all_in_dir {
     my @todo = @_;
-    while (my $fn = pop @todo){
+    while (defined(my $fn = pop @todo)){
         $fn .= '/' unless ($fn =~ m#/$#);
         opendir my $DIR, $fn or die "Cannot opend directory '$fn' for reading: $!";
         IW: while (my $f = readdir $DIR){
