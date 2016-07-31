@@ -72,8 +72,8 @@ my @input_tokens = (
             )/x                         ],
         [ 'TAG_END',        qr/\s*\]\]\]/],
         [ 'TAG_END',        qr/\s*\%\]/],
-        [ 'BRACES_START',   qr/{{/],
-        [ 'BRACES_END',     qr/}}/],
+        [ 'BRACES_START',   qr/\{\{/],
+        [ 'BRACES_END',     qr/\}\}/],
     );
 
 sub parse_all_in_dir {
