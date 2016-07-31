@@ -91,6 +91,7 @@ sub parse_all_in_dir {
                        $f eq '..'
                     or $f eq '.'
                     or $f eq  '.svn'
+                    or $f eq  '.git'
                     or $f =~ m{(?:~|\.swp)$}){
                 next;
             }

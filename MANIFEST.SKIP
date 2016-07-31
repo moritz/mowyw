@@ -3,6 +3,7 @@
 \bCVS\b
 ,v$
 \B\.svn\b
+\.git\b
 \B\.cvsignore$
 \B\.git
 \.gitignore$
