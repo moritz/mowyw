@@ -1,3 +1,8 @@
+mowyw (0.8.0)
+	* lib/App/Mowyw.pm: Fix deprecation warnings in regexes
+	* lib/App/Mowyw.pm: Ignore .git directories
+	* Build.PL: Require perl 5.10 at least
+	* travis testing
 mowyw (0.7.2)
 	* lib/App/Mowyw.pm: guard against failed opendir()
 mowyw (0.7.1)
@@ -55,3 +60,5 @@ mowyw (0.2.0)
 	* mowyw: (nearly) complete rewrite using a recursive-descending parser
 	* README: added description for [[[verbatim foo]]] (arbitrary
 	stuff)[[[endverbatim foo]]]
+
+# vim: set noexpandtab
